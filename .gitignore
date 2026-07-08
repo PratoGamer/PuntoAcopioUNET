@@ -1,0 +1,11 @@
+## Ignore Visual Studio Temporary Files and Build Output
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## WebView2 / Blazor Hybrid specific ignores
+**/EBWebView/
