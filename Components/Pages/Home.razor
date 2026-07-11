@@ -2,7 +2,7 @@
 @using PuntoAcopioUNET.Services
 @inject LogisticaService LogisticaService
 
-<div class="container-fluid py-4" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; min-height: 90vh;">
+<div class="container-fluid py-4 bg-light min-vh-100" >
     <!-- Encabezado Principal -->
     <div class="row mb-4">
         <div class="col-12 text-center text-md-start">
@@ -70,7 +70,7 @@
 
                         @if (!LogisticaService.secuenciaOriginal.Any())
                         {
-                            <div class="text-center py-4 bg-light rounded-3 text-muted border border-dashed">
+                            <div class="text-center py-4 bg-light rounded-3 text-muted border border-dark border-2">
                                 <i class="fa-solid fa-list-numeric d-block fs-3 mb-2 opacity-50"></i>
                                 <span class="small">La secuencia está vacía. Añade números para comenzar.</span>
                             </div>
@@ -81,9 +81,9 @@
                                 @for (int i = 0; i < LogisticaService.secuenciaOriginal.Count; i++)
                                 {
                                     int index = i;
-                                    <span class="badge bg-dark fs-6 py-2 px-3 rounded-pill d-inline-flex align-items-center gap-2 shadow-sm animate-badge">
+                                    <span class="badge bg-dark fs-6 py-2 px-3 rounded-pill d-inline-flex align-items-center gap-2 shadow-sm ">
                                         @LogisticaService.secuenciaOriginal[index]
-                                        <i class="fa-solid fa-xmark text-danger-hover cursor-pointer" @onclick="() => EliminarNumero(index)"></i>
+                                        <i class="bi bi-x text-danger opacity-75 opacity-100-hover "role="button" @onclick="() => EliminarNumero(index)"></i>
                                     </span>
                                 }
                             </div>
@@ -121,17 +121,17 @@
                         <div class="text-center py-5 my-5 text-muted">
                             <img src="https://placehold.co/150x150/e9ecef/6c757d?text=Logistica" class="mb-4 rounded-circle border p-2" alt="Logo Logística" />
                             <h4>Listo para Calcular</h4>
-                            <p class="max-width-400 mx-auto">Configura tu secuencia original en el panel de la izquierda y haz clic en "Calcular Logística" para ver la magia de la optimización recursiva.</p>
+                            <p class="text-muted col-10 col-md-8 mx-auto">Configura tu secuencia original en el panel de la izquierda y haz clic en "Calcular Logística" para ver la magia de la optimización recursiva.</p>
                         </div>
                     }
                     else if (isCalculating)
                     {
                         <div class="text-center py-5 my-5">
-                            <div class="spinner-grow text-success" style="width: 3rem; height: 3rem;" role="status">
+                            <div class="spinner-grow text-success"  role="status">
                                 <span class="visually-hidden">Calculando...</span>
                             </div>
                             <h4 class="mt-4 fw-bold">Procesando Hilos en Segundo Plano</h4>
-                            <p class="text-muted max-width-400 mx-auto">Ejecutando tres algoritmos asíncronos recursivos en paralelo, aplicando poda extrema de ramas de costo mayor a 60.</p>
+                            <p class="text-muted col-10 col-md-8 mx-auto">Ejecutando tres algoritmos asíncronos recursivos en paralelo, aplicando poda extrema de ramas de costo mayor a 60.</p>
                         </div>
                     }
                     else
@@ -237,14 +237,14 @@
                     <div class="text-center py-4 text-muted">
                         <i class="fa-solid fa-circle-nodes fs-4 d-block mb-2 opacity-50"></i>
                         <span class="small fw-semibold text-danger">Poda Excedida (> 60)</span>
-                        <p class="x-small text-muted mt-1 mb-0">No se halló solución con costo menor al límite.</p>
+                        <p class="small text-muted mt-1 mb-0">No se halló solución con costo menor al límite.</p>
                     </div>
                 }
                 else
                 {
                     <!-- Costo Total Acumulado -->
                     <div class="text-center mb-3 bg-light rounded-3 py-2 border">
-                        <span class="small text-muted d-block uppercase fw-bold" style="font-size: 10px;">Costo Total</span>
+                        <span class="small text-muted d-block text-uppercase fw-bold " >Costo Total</span>
                         <span class="fs-4 fw-bold text-success">@resultado.Costos.Sum() ptos</span>
                     </div>
 
@@ -270,11 +270,11 @@
                                 <div class="step-row d-flex align-items-center justify-content-between mb-2 p-2 rounded bg-light border-start border-3 border-success">
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="orig-val text-muted small">@op.valorAntes</span>
-                                        <span class="badge bg-dark font-monospace text-xs">@op.operacion</span>
-                                        <i class="fa-solid fa-arrow-right-long text-muted x-small"></i>
+                                        <span class="badge bg-dark font-monospace small">@op.operacion</span>
+                                        <i class="fa-solid fa-arrow-right-long text-muted small"></i>
                                         <span class="dest-val fw-bold text-dark">@op.valorDespues</span>
                                     </div>
-                                    <span class="badge bg-outline-secondary text-xs">+$@costoOp</span>
+                                    <span class="badge border border-secondary text-secondary small">+$@costoOp</span>
                                 </div>
                             }
                         </div>
@@ -285,37 +285,3 @@
     };
 }
 
-<style>
-    /* Estilos Exclusivos para mejorar la Aesthetica y Evitar Desborde */
-    .border-dashed {
-        border: 2px dashed #dee2e6 !important;
-    }
-    .text-danger-hover:hover {
-        color: #dc3545 !important;
-        transform: scale(1.15);
-    }
-    .cursor-pointer {
-        cursor: pointer;
-    }
-    .text-xs {
-        font-size: 0.75rem !important;
-    }
-    .x-small {
-        font-size: 0.7rem;
-    }
-    .max-width-400 {
-        max-width: 400px;
-    }
-    .bg-outline-secondary {
-        background-color: transparent;
-        border: 1px solid #ced4da;
-        color: #495057;
-    }
-    .animate-badge {
-        animation: fadeInBadge 0.25s ease-out;
-    }
-    @@keyframes fadeInBadge {
-        from { opacity: 0; transform: scale(0.85); }
-        to { opacity: 1; transform: scale(1); }
-    }
-</style>
