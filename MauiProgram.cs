@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
+
 namespace PuntoAcopioUNET
 {
     public static class MauiProgram
@@ -15,9 +16,10 @@ namespace PuntoAcopioUNET
                 });
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddSingleton<Services.LogisticaService>();
 
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
 
