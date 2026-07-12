@@ -126,16 +126,17 @@
 
                             @if (!haCalculado && !isCalculating)
                             {
-                         <div class="text-center py-5 my-5 text-muted">
+                                <div class="text-center py-5 my-5 text-muted">
 
-<div class="mb-4 text-secondary">
-    <i class="bi bi-box-seam fs-1"></i>
-</div>
-    <h4>Listo para Calcular</h4>
-    <p class="text-muted col-10 col-md-8 mx-auto">
-        Configura tu secuencia original en el panel de la izquierda y haz clic en "Calcular Logística" para ver la magia de la optimización recursiva.
-    </p>
-</div>
+                                    <div class="mb-4 text-secondary">
+                                        <i class="bi bi-box-seam fs-1"></i>
+                                    </div>
+                                    <h4>Listo para Calcular</h4>
+                                    <p class="text-muted col-10 col-md-8 mx-auto">
+                                        Configura tu secuencia original en el panel de la izquierda y haz clic en "Calcular
+                                        Logística" para ver la magia de la optimización recursiva.
+                                    </p>
+                                </div>
 
                             }
                             else if (isCalculating)
@@ -191,7 +192,7 @@
                                             <div class="card-body">
                                                 <strong>Destino:</strong> <span class="badge bg-success small"> @item.Destino</span> <br />
                                                 <strong>Secuencia:</strong> <span class="badge bg-success small">@string.Join(" → ",
-                                                                                                                                item.Secuencia)</span> <br />
+                                                                                                                                                                                item.Secuencia)</span> <br />
                                                 <strong>Método:</strong> <span class="badge bg-success small">@item.Metodo</span> <br />
                                                 <strong>Costo:</strong> <span class="badge bg-success small"> @item.Costo pts</span>
                                             </div>
@@ -362,10 +363,10 @@
                                     <div
                                         class="step-row d-flex align-items-center justify-content-between mb-2 p-2 rounded bg-light border-start border-3 border-success">
                                         <div class="d-flex align-items-center gap-2">
-                                            <span class="orig-val text-muted small">@op.valorAntes</span>
+                                            <span class=" text-muted small">@op.valorAntes</span>
                                             <span class="badge bg-dark font-monospace small">@op.operacion</span>
                                             <i class=" bi bi-arrow-right text-muted small"></i>
-                                            <span class="dest-val fw-bold text-dark">@op.valorDespues</span>
+                                            <span class=" fw-bold text-dark">@op.valorDespues</span>
                                         </div>
                                         <span class="badge border border-secondary text-secondary small">+$@costoOp</span>
                                     </div>
@@ -376,6 +377,6 @@
                 </div>
             </div>
         }
-            ;
+                ;
     }
 
