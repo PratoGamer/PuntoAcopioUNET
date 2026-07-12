@@ -7,7 +7,8 @@
     <!-- Encabezado Principal -->
     <div class="row mb-4">
         <div class="col-12 text-center text-md-start">
-            <h1 class="display-6 fw-bold text-dark mb-1"> <i class="bi bi-person-raised-hand"></i> Punto de Acopio UNET</h1>
+            <h1 class="display-6 fw-bold text-dark mb-1"> <i class="bi bi-person-raised-hand"></i> Punto de Acopio UNET
+            </h1>
             <p class="text-muted">Calculador de Costos Logísticos Optimizados <i class="bi bi-boxes"></i>
             </p>
         </div>
@@ -195,7 +196,8 @@
                                         <div class="card mb-2 alert alert-success shadow-sm mt-3">
                                             <div class="card-body">
                                                 <strong>Destino:</strong> <span class="badge bg-success small"> @item.Destino</span> <br />
-                                                <strong>Secuencia:</strong> <span class="badge bg-success small">@string.Join(" → ",item.Secuencia)</span> <br />
+                                                <strong>Secuencia Inicial:</strong> <span class="badge bg-success small">@string.Join(" → ", item.Secuencia)</span> <br />
+                                                <strong>Secuencia Final:</strong> <span class="badge bg-success small">@string.Join(" → ", item.SecuenciaFinal)</span> <br />
                                                 <strong>Método:</strong> <span class="badge bg-success small">@item.Metodo</span> <br />
                                                 <strong>Costo:</strong> <span class="badge bg-success small"> @item.Costo pts</span>
                                             </div>
@@ -210,15 +212,17 @@
 
 @code {
 
-	// Variables de Estado
+    // Variables de Estado
     private int nuevoNumero = 0;
     private bool isCalculating = false;
     private bool haCalculado = false;
-    private List<(string Destino, List<int> Secuencia, string Metodo, int Costo)> cargamentos = new();
+    private List<(string Destino, List<int> Secuencia, List<int> SecuenciaFinal, string Metodo, int Costo)> cargamentos =
+  new();
     private string destino = "";
 
-	// Metodo para Obtener la Mejor Opcion de Costo
-    private void ObtenerMejorOpcion()
+    // Metodo para Obtener la Mejor Opcion de Costo
+    // Método refactorizado que devuelve el objeto del mejor resultado
+    private (string Metodo, int Costo, Datos? Resultado) ObtenerMejorOpcion()
     {
         var opciones = new List<(string Metodo, Datos Resultado)>
     {
@@ -234,16 +238,11 @@
 
         if (mejor.Resultado != null)
         {
-            mejorMetodo = mejor.Metodo;
-            mejorCosto = mejor.Resultado.Costos.Sum();
+            return (mejor.Metodo, mejor.Resultado.Costos.Sum(), mejor.Resultado);
         }
-        else
-        {
-            mejorMetodo = "Sin solución";
-            mejorCosto = 0;
-        }
-    }
 
+        return ("Sin solución", 0, null);
+    }
     // Agregar número a la secuencia
     private void AgregarNumero()
     {
@@ -302,12 +301,20 @@
 
         // Se ejecuta en hilos de fondo de manera fluida
         await LogisticaService.CalcularOrden();
-        ObtenerMejorOpcion();
+        var (metodo, costo, resultadoGanador) = ObtenerMejorOpcion();
+        // Actualizamos las variables de estado
+        mejorMetodo = metodo;
+        mejorCosto = costo;
+        // Extraemos los valorDespues directamente del resultado devuelto
+        List<int> secuenciaFinal = resultadoGanador?.Operaciones
+            .Select(op => op.valorDespues)
+            .ToList() ?? new List<int>();
         cargamentos.Add((
-            destino,
-            LogisticaService.secuenciaOriginal.ToList(),
-            mejorMetodo,
-            mejorCosto
+    destino,
+        LogisticaService.secuenciaOriginal.ToList(),
+        secuenciaFinal,
+        mejorMetodo,
+        mejorCosto
         ));
 
         // Limpiar para una Nueva Entrada
@@ -323,7 +330,8 @@
     private int mejorCosto = 0;
 
     // Fragmento para las Tarjetas de Resultados
-    private RenderFragment RenderCardResultados(string titulo, string icon, string colorClass, Datos resultado) => __builder =>
+    private RenderFragment RenderCardResultados(string titulo, string icon, string colorClass, Datos resultado) => __builder
+=>
     {
     <div class="card h-100 border-0 bg-white shadow-sm rounded-3 overflow-hidden">
         <div class="card-header @colorClass d-flex justify-content-between align-items-center py-3 border-0">
@@ -368,14 +376,15 @@
                                     var op = resultado.Operaciones[i];
                                     var costoOp = resultado.Costos[i];
                                     <div
-                                        class="step-row d-flex align-items-center justify-content-between mb-2 p-2 rounded bg-light border-start border-3 border-success">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class=" text-muted small">@op.valorAntes</span>
+                                        class="step-row d-flex align-items-center mb-2 p-2 rounded bg-light border-start border-3 border-success">
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                            <span class="text-muted small">@op.valorAntes</span>
                                             <span class="badge bg-dark font-monospace small">@op.operacion</span>
-                                            <i class=" bi bi-arrow-right text-muted small"></i>
-                                            <span class=" fw-bold text-dark">@op.valorDespues</span>
+                                            <i class="bi bi-arrow-right text-muted small"></i>
+                                            <span class="fw-bold text-dark">@op.valorDespues</span>
+
+                                            <span class="badge border border-secondary text-secondary small text-nowrap">+$@costoOp</span>
                                         </div>
-                                        <span class="badge border border-secondary text-secondary small">+$@costoOp</span>
                                     </div>
                                 }
                             </div>
@@ -383,7 +392,8 @@
                     }
                 </div>
             </div>
-        };
+        }
+        ;
 
     }
 
