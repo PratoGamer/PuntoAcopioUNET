@@ -45,14 +45,14 @@
 
                             <!-- Presets de Prueba Rapida -->
                             <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Pruebas Rápidas (Presets)</label>
+                                <label class="form-label text-muted small fw-bold">Pruebas Rápidas</label>
                                 <div class="d-flex gap-2 flex-wrap">
                                     <button class="btn btn-sm btn-outline-secondary rounded-pill"
                                             @onclick="() => CargarPreset(new int[] { 10, 5, 20 })">Caso Simple</button>
                                     <button class="btn btn-sm btn-outline-secondary rounded-pill"
                                             @onclick="() => CargarPreset(new int[] { 4, 8, 3, 12 })">Caso Mediano</button>
                                     <button class="btn btn-sm btn-outline-secondary rounded-pill"
-                                            @onclick="() => CargarPreset(new int[] { 3, 6, 12, 2, 4 })">Caso Complejo</button>
+                                            @onclick="() => CargarPreset(new int[] { 3, 6, 12, 2, 4 })">Caso Grande</button>
                                 </div>
                             </div>
 
@@ -209,11 +209,15 @@
             </div>
 
 @code {
+
+	// Variables de Estado
     private int nuevoNumero = 0;
     private bool isCalculating = false;
     private bool haCalculado = false;
     private List<(string Destino, List<int> Secuencia, string Metodo, int Costo)> cargamentos = new();
     private string destino = "";
+
+	// Metodo para Obtener la Mejor Opcion de Costo
     private void ObtenerMejorOpcion()
     {
         var opciones = new List<(string Metodo, Datos Resultado)>
@@ -293,8 +297,8 @@
         haCalculado = false;
         StateHasChanged(); // Renderiza el Spinner inmediatamente
 
-        // Pequeña pausa opcional (50ms) para garantizar que la UI pinte el Loading antes de la carga de CPU
-        await Task.Delay(50);
+        // Pausa Corta para Mostrar el Spinner
+        await Task.Delay(500);
 
         // Se ejecuta en hilos de fondo de manera fluida
         await LogisticaService.CalcularOrden();
@@ -305,19 +309,20 @@
             mejorMetodo,
             mejorCosto
         ));
-        // Limpiar para un nuevo cargamento
+
+        // Limpiar para una Nueva Entrada
         destino = "";
         LogisticaService.secuenciaOriginal.Clear();
         nuevoNumero = 0;
         isCalculating = false;
         haCalculado = true;
+
     }
+
     private string mejorMetodo = "";
     private int mejorCosto = 0;
 
-
-
-    // Fragmento de Renderizado Reutilizable para las Tarjetas de Resultados
+    // Fragmento para las Tarjetas de Resultados
     private RenderFragment RenderCardResultados(string titulo, string icon, string colorClass, Datos resultado) => __builder =>
     {
     <div class="card h-100 border-0 bg-white shadow-sm rounded-3 overflow-hidden">
