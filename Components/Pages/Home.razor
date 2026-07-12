@@ -3,16 +3,18 @@
 @inject LogisticaService LogisticaService
 
 <div class="container-fluid py-4 bg-light min-vh-100">
+
     <!-- Encabezado Principal -->
     <div class="row mb-4">
         <div class="col-12 text-center text-md-start">
-            <h1 class="display-6 fw-bold text-dark mb-1">Punto de Acopio UNET</h1>
-            <p class="text-muted">Calculador de Costos Logísticos Optimizados (Algoritmo Recursivo con Poda Asíncrona)
+            <h1 class="display-6 fw-bold text-dark mb-1"> <i class="bi bi-person-raised-hand"></i> Punto de Acopio UNET</h1>
+            <p class="text-muted">Calculador de Costos Logísticos Optimizados <i class="bi bi-boxes"></i>
             </p>
         </div>
     </div>
 
     <div class="row g-4">
+
         <!-- Panel Izquierdo: Entrada de Datos -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100 rounded-4">
@@ -21,7 +23,7 @@
                         <i class="bi bi-gear-fill me-2 text-primary"></i>Configuración de Secuencia
                     </h5>
 
-                    <!-- Entrada de números -->
+                    <!-- Entrada de Numeros -->
                     <div class="mb-4">
                         <label class="form-label text-muted small fw-bold">Ingresar Número Entero (Solo
                             positivos)</label>
@@ -41,7 +43,7 @@
                                 }
                             </div>
 
-                            <!-- Presets de Prueba Rápida -->
+                            <!-- Presets de Prueba Rapida -->
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Pruebas Rápidas (Presets)</label>
                                 <div class="d-flex gap-2 flex-wrap">
@@ -92,7 +94,13 @@
                                 }
                             </div>
 
-                            <!-- Acción de Cálculo -->
+                            <!-- Destino del Cargamento -->
+                            <label class="form-label fw-bold text-muted">
+                                Destino del Cargamento
+                            </label>
+                            <input class="form-control my-1" @bind="destino" placeholder="Ej. Mérida, San Cristóbal..." />
+
+                            <!-- Boton para Calcular -->
                             <button class="btn btn-success w-100 py-3 rounded-3 fw-bold fs-5 shadow-sm text-white"
                                     @onclick="ProcesarCalculo"
                                     disabled="@(isCalculating || !LogisticaService.secuenciaOriginal.Any()|| string.IsNullOrWhiteSpace(destino))">
@@ -106,11 +114,7 @@
                                     <span><i class="bi bi-lightning-charge-fill me-2"></i>Calcular Logística</span>
                                 }
                             </button>
-                            <label class="form-label fw-bold text-muted">
-                                Destino del Cargamento
-                            </label>
 
-                            <input class="form-control" @bind="destino" placeholder="Ej. Mérida, San Cristóbal..." />
                         </div>
 
                     </div>
@@ -133,8 +137,8 @@
                                     </div>
                                     <h4>Listo para Calcular</h4>
                                     <p class="text-muted col-10 col-md-8 mx-auto">
-                                        Configura tu secuencia original en el panel de la izquierda y haz clic en "Calcular
-                                        Logística" para ver la magia de la optimización recursiva.
+                                        Configura la Secuencia de Cajas en el Panel de la Izquierda y Haz Clic en "Calcular
+                                        Logística".
                                     </p>
                                 </div>
 
@@ -147,10 +151,10 @@
                                     </div>
                                     <h4 class="mt-4 fw-bold">Procesando Hilos en Segundo Plano</h4>
                                     <p class="text-muted col-10 col-md-8 mx-auto">Ejecutando tres algoritmos asíncronos recursivos
-                                        en paralelo, aplicando poda extrema de ramas de costo mayor a 60.</p>
+                                        en paralelo, aplicando poda extrema de ramas de costo mayor a @LogisticaService.poda.</p>
                                     </div>
                                 }
-                    else
+                            else
                                 {
                                     <!-- Grid de 3 Columnas para los Resultados -->
                                     <div class="row g-4">
@@ -184,15 +188,14 @@
                                 }
                                 @if (cargamentos.Any())
                                 {
-                                    <h5 class="mt-4">Historial de Cargamentos</h5>
+                                    <h5 class="mt-4">Historial de Cargamentos <i class="bi bi-book-half"></i> </h5>
 
                                     @foreach (var item in cargamentos)
                                     {
                                         <div class="card mb-2 alert alert-success shadow-sm mt-3">
                                             <div class="card-body">
                                                 <strong>Destino:</strong> <span class="badge bg-success small"> @item.Destino</span> <br />
-                                                <strong>Secuencia:</strong> <span class="badge bg-success small">@string.Join(" → ",
-                                                                                                                                                                                item.Secuencia)</span> <br />
+                                                <strong>Secuencia:</strong> <span class="badge bg-success small">@string.Join(" → ",item.Secuencia)</span> <br />
                                                 <strong>Método:</strong> <span class="badge bg-success small">@item.Metodo</span> <br />
                                                 <strong>Costo:</strong> <span class="badge bg-success small"> @item.Costo pts</span>
                                             </div>
@@ -315,8 +318,7 @@
 
 
     // Fragmento de Renderizado Reutilizable para las Tarjetas de Resultados
-    private RenderFragment RenderCardResultados(string titulo, string icon, string colorClass, Datos resultado) => __builder
-=>
+    private RenderFragment RenderCardResultados(string titulo, string icon, string colorClass, Datos resultado) => __builder =>
     {
     <div class="card h-100 border-0 bg-white shadow-sm rounded-3 overflow-hidden">
         <div class="card-header @colorClass d-flex justify-content-between align-items-center py-3 border-0">
@@ -327,7 +329,7 @@
             {
                 <div class="text-center py-4 text-muted">
                     <i class="bi bi-diagram-3-fill fs-4 d-block mb-2 opacity-50"></i>
-                    <span class="small fw-semibold text-danger">Poda Excedida (> 60)</span>
+                    <span class="small fw-semibold text-danger">Poda Excedida (> @LogisticaService.poda)</span>
                     <p class="small text-muted mt-1 mb-0">No se halló solución con costo menor al límite.</p>
                 </div>
             }
@@ -376,7 +378,7 @@
                     }
                 </div>
             </div>
-        }
-                ;
+        };
+
     }
 

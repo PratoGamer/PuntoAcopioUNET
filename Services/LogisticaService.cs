@@ -7,8 +7,10 @@ namespace PuntoAcopioUNET.Services
 {
     public class LogisticaService
     {
+        // Entrada de la Secuencia Original
         public List<int> secuenciaOriginal { get; set; } = new List<int>();
 
+        // Diccionario de Costos de Operaciones
         public Dictionary<string, int> operacion { get; set; } = new Dictionary<string, int>()
         {
             { "+1", 1 },
@@ -17,219 +19,265 @@ namespace PuntoAcopioUNET.Services
             { "/2", 2 }
         };
 
+        // Propiedades para Resultados de cada Estrategia
         public Datos ResultadoAscendente { get; private set; }
         public Datos ResultadoDescendente { get; private set; }
         public Datos ResultadoConstante { get; private set; }
 
-        // Poda inicial preventiva alta pero segura para evitar desbordamientos
-        private int poda = 500;
+        // Limite de Poda 
+        public int poda = int.MaxValue;
 
+        // Variables Globales Auxiliares
+        private int mejorCostoGlobal;
+        private List<string> operacionesActuales = new List<string>();
+        private List<int> valoresTransformadosActuales = new List<int>();
+        private List<int> costosActuales = new List<int>();
+
+        // Variables para Guardar la Mejor Solución Encontrada
+        private List<string> mejoresOperaciones = new List<string>();
+        private List<int> mejoresValoresTransformados = new List<int>();
+        private List<int> mejoresCostos = new List<int>();
+
+        // Variables de Costos
         private int costoMas1, costoMenos1, costoPor2, costoDiv2;
 
+        // Constructor de la Clase LogisticaService
         public LogisticaService()
         {
+
+            // Almacenar cada uno de los Valores
             costoMas1 = operacion["+1"];
             costoMenos1 = operacion["-1"];
             costoPor2 = operacion["*2"];
             costoDiv2 = operacion["/2"];
+
         }
 
+        // Metodo Principal para Calcular el Orden de la Secuencia
         public async Task CalcularOrden()
         {
+
+            // Verificar que la Secuencia no este Vacia o Nula
             if (secuenciaOriginal == null || secuenciaOriginal.Count == 0) return;
 
-            int[] secuenciaBase = secuenciaOriginal.ToArray();
+            // Convertir a un Array Estatico
+            int[] seq = secuenciaOriginal.ToArray();
 
-            // Ejecución asíncrona multihilo en paralelo
-            var tareaAsc = Task.Run(() => CalcularAscendente(secuenciaBase));
-            var tareaDesc = Task.Run(() => CalcularDescendente(secuenciaBase));
-            var tareaConst = Task.Run(() => CalcularConstante(secuenciaBase));
+            // Ejecutar Cada una de las Estrategias de Ordenamiento
+            EjecutarEstrategiaAscendente(seq);
+            EjecutarEstrategiaDescendente(seq);
+            EjecutarEstrategiaConstante(seq);
 
-            await Task.WhenAll(tareaAsc, tareaDesc, tareaConst);
+            // Esperar a que Todas las Tareas se Terminen de forma Asincrona
+            await Task.CompletedTask;
 
-            ResultadoAscendente = tareaAsc.Result;
-            ResultadoDescendente = tareaDesc.Result;
-            ResultadoConstante = tareaConst.Result;
         }
 
-        private Datos CalcularAscendente(int[] secuenciaBase)
+        // Metodo de Estrategia Ascendente
+        private void EjecutarEstrategiaAscendente(int[] seq)
         {
-            string[] opsElegidas = new string[secuenciaBase.Length];
-            int[] valoresDespues = new int[secuenciaBase.Length];
-            int[] costosAplicados = new int[secuenciaBase.Length];
 
-            int mejorCosto = poda;
-            string[] mejorOps = new string[secuenciaBase.Length];
-            int[] mejorValores = new int[secuenciaBase.Length];
-            int[] mejorCostos = new int[secuenciaBase.Length];
+            // Iniciar las Listas
+            InicializarListasDeControl();
 
-            // Para Ascendente, el criterio es: cada número debe ser >= que el anterior transformado
-            ResolverEstrategia(0, 0, -1, true, secuenciaBase, opsElegidas, valoresDespues, costosAplicados, ref mejorCosto, mejorOps, mejorValores, mejorCostos);
+            // Inicio de la Recursion para Ascendente
+            ResolverAscendenteDescendente(0, 0, -1, true, seq);
 
-            return mejorCosto < poda ? ConstruirDatos(secuenciaBase, mejorOps, mejorValores, mejorCostos) : null;
+            // Si se Encuentra la Mejor Solucion, Construir el Objeto de Salida
+            ResultadoAscendente = mejorCostoGlobal < poda ? ConstruirDatosDeSalida(seq) : null;
+
         }
 
-        private Datos CalcularDescendente(int[] secuenciaBase)
+        // Metodo de Estrategia Descendente
+        private void EjecutarEstrategiaDescendente(int[] seq)
         {
-            string[] opsElegidas = new string[secuenciaBase.Length];
-            int[] valoresDespues = new int[secuenciaBase.Length];
-            int[] costosAplicados = new int[secuenciaBase.Length];
 
-            int mejorCosto = poda;
-            string[] mejorOps = new string[secuenciaBase.Length];
-            int[] mejorValores = new int[secuenciaBase.Length];
-            int[] mejorCostos = new int[secuenciaBase.Length];
+            // Iniciar las Listas
+            InicializarListasDeControl();
 
-            // Para Descendente, el criterio es: cada número debe ser <= que el anterior transformado
-            ResolverEstrategia(0, 0, int.MaxValue, false, secuenciaBase, opsElegidas, valoresDespues, costosAplicados, ref mejorCosto, mejorOps, mejorValores, mejorCostos);
+            // Inicio de la Recursion para Decendente
+            ResolverAscendenteDescendente(0, 0, int.MaxValue, false, seq);
 
-            return mejorCosto < poda ? ConstruirDatos(secuenciaBase, mejorOps, mejorValores, mejorCostos) : null;
+            // Si se Encuentra la Mejor Solucion, Construir el Objeto de Salida
+            ResultadoDescendente = mejorCostoGlobal < poda ? ConstruirDatosDeSalida(seq) : null;
+
         }
 
-        private Datos CalcularConstante(int[] secuenciaBase)
+        // Metodo de Estrategia Constante
+        private void EjecutarEstrategiaConstante(int[] seq)
         {
-            string[] opsElegidas = new string[secuenciaBase.Length];
-            int[] valoresDespues = new int[secuenciaBase.Length];
-            int[] costosAplicados = new int[secuenciaBase.Length];
 
-            int mejorCosto = poda;
-            string[] mejorOps = new string[secuenciaBase.Length];
-            int[] mejorValores = new int[secuenciaBase.Length];
-            int[] mejorCostos = new int[secuenciaBase.Length];
+            // Iniciar las Listas
+            InicializarListasDeControl();
 
-            // Enviamos -2 como bandera de que el pivote constante aún no se ha definido (se define en el índice 0)
-            ResolverConstanteRecursivo(0, 0, -2, secuenciaBase, opsElegidas, valoresDespues, costosAplicados, ref mejorCosto, mejorOps, mejorValores, mejorCostos);
+            // Inicio de la Recursion para Constante
+            ResolverConstante(0, 0, -2, seq);
 
-            return mejorCosto < poda ? ConstruirDatos(secuenciaBase, mejorOps, mejorValores, mejorCostos) : null;
+            // Si se Encuentra la Mejor Solucion, Construir el Objeto de Salida
+            ResultadoConstante = mejorCostoGlobal < poda ? ConstruirDatosDeSalida(seq) : null;
+
         }
 
-        // ====================================================================
-        // NÚCLEO ÚNICO PARA ASCENDENTE / DESCENDENTE (Poda por comparación de último estado)
-        // ====================================================================
-        private void ResolverEstrategia(int idx, int costoAcumulado, int ultimoValorTransformado, bool esAscendente,
-            int[] seq, string[] ops, int[] valsDespues, int[] costos,
-            ref int mejorCostoGlobal, string[] mOps, int[] mVals, int[] mCostos)
+        // Metodo para Inicializar las Listas de Control
+        private void InicializarListasDeControl()
         {
-            // PODA POR COSTO: Si ya igualamos o superamos el mejor costo global, matamos la rama de inmediato
+            mejorCostoGlobal = poda;
+
+            operacionesActuales.Clear();
+            valoresTransformadosActuales.Clear();
+            costosActuales.Clear();
+
+            mejoresOperaciones.Clear();
+            mejoresValoresTransformados.Clear();
+            mejoresCostos.Clear();
+        }
+
+        // Metodo Recursivo para Resolver Ascendente o Descendente
+        private void ResolverAscendenteDescendente(int idx, int costoAcumulado, int ultimoValor, bool esAscendente, int[] seq)
+        {
+
+            // Poda del Costo Acumulado
             if (costoAcumulado >= mejorCostoGlobal) return;
 
-            // CASO BASE: Llegamos al final con éxito manteniendo el criterio en cada paso
+            // Mejor Solucion Encontrada al Finalizar la Secuencia
             if (idx == seq.Length)
             {
                 mejorCostoGlobal = costoAcumulado;
-                Array.Copy(ops, mOps, seq.Length);
-                Array.Copy(valsDespues, mVals, seq.Length);
-                Array.Copy(costos, mCostos, seq.Length);
+                mejoresOperaciones = new List<string>(operacionesActuales);
+                mejoresValoresTransformados = new List<int>(valoresTransformadosActuales);
+                mejoresCostos = new List<int>(costosActuales);
                 return;
             }
 
+            // Obtener el Valor Original del Elemento Actual
             int valOriginal = seq[idx];
 
-            // Evaluamos las 5 opciones en orden de costo (0 primero para potenciar la poda rápida)
-
-            // 1. NINGUNA (Costo 0)
-            if (idx == 0 || (esAscendente ? valOriginal >= ultimoValorTransformado : valOriginal <= ultimoValorTransformado))
+            // 1. Opción "Ninguna" (Costo 0)
+            if (idx == 0 || (esAscendente ? valOriginal > ultimoValor : valOriginal < ultimoValor))
             {
-                AsignarYResolver(idx, costoAcumulado, valOriginal, "Ninguna", 0, esAscendente, seq, ops, valsDespues, costos, ref mejorCostoGlobal, mOps, mVals, mCostos);
+                ProbarPaso(idx, costoAcumulado, valOriginal, "Ninguna", 0, esAscendente, seq, false);
             }
 
-            // 2. +1 (Costo 1)
+            // 2. Opción "+1" (Costo 1)
             int valMas1 = valOriginal + 1;
-            if (idx == 0 || (esAscendente ? valMas1 >= ultimoValorTransformado : valMas1 <= ultimoValorTransformado))
+            if (idx == 0 || (esAscendente ? valMas1 > ultimoValor : valMas1 < ultimoValor))
             {
-                AsignarYResolver(idx, costoAcumulado + costoMas1, valMas1, "+1", costoMas1, esAscendente, seq, ops, valsDespues, costos, ref mejorCostoGlobal, mOps, mVals, mCostos);
+                ProbarPaso(idx, costoAcumulado + costoMas1, valMas1, "+1", costoMas1, esAscendente, seq, false);
             }
 
-            // 3. -1 (Costo 1)
+            // 3. Opción "-1" (Costo 1)
             int valMenos1 = valOriginal - 1;
-            if (valMenos1 >= 0 && (idx == 0 || (esAscendente ? valMenos1 >= ultimoValorTransformado : valMenos1 <= ultimoValorTransformado)))
+            if (valMenos1 >= 0 && (idx == 0 || (esAscendente ? valMenos1 > ultimoValor : valMenos1 < ultimoValor)))
             {
-                AsignarYResolver(idx, costoAcumulado + costoMenos1, valMenos1, "-1", costoMenos1, esAscendente, seq, ops, valsDespues, costos, ref mejorCostoGlobal, mOps, mVals, mCostos);
+                ProbarPaso(idx, costoAcumulado + costoMenos1, valMenos1, "-1", costoMenos1, esAscendente, seq, false);
             }
 
-            // 4. /2 (Costo 2, solo si es par)
+            // 4. Opción "/2" (Costo 2, si es par)
             if (valOriginal % 2 == 0)
             {
                 int valDiv2 = valOriginal / 2;
-                if (idx == 0 || (esAscendente ? valDiv2 >= ultimoValorTransformado : valDiv2 <= ultimoValorTransformado))
+                if (idx == 0 || (esAscendente ? valDiv2 > ultimoValor : valDiv2 < ultimoValor))
                 {
-                    AsignarYResolver(idx, costoAcumulado + costoDiv2, valDiv2, "/2", costoDiv2, esAscendente, seq, ops, valsDespues, costos, ref mejorCostoGlobal, mOps, mVals, mCostos);
+                    ProbarPaso(idx, costoAcumulado + costoDiv2, valDiv2, "/2", costoDiv2, esAscendente, seq, false);
                 }
             }
 
-            // 5. *2 (Costo 3)
+            // 5. Opción "*2" (Costo 3)
             int valPor2 = valOriginal * 2;
-            if (idx == 0 || (esAscendente ? valPor2 >= ultimoValorTransformado : valPor2 <= ultimoValorTransformado))
+            if (idx == 0 || (esAscendente ? valPor2 > ultimoValor : valPor2 < ultimoValor))
             {
-                AsignarYResolver(idx, costoAcumulado + costoPor2, valPor2, "*2", costoPor2, esAscendente, seq, ops, valsDespues, costos, ref mejorCostoGlobal, mOps, mVals, mCostos);
+                ProbarPaso(idx, costoAcumulado + costoPor2, valPor2, "*2", costoPor2, esAscendente, seq, false);
             }
         }
 
-        private void AsignarYResolver(int idx, int nuevoCosto, int nuevoValor, string opStr, int costoOp, bool esAscendente,
-            int[] seq, string[] ops, int[] valsDespues, int[] costos, ref int mejorCostoGlobal, string[] mOps, int[] mVals, int[] mCostos)
+        // Metodo Recursivo para Resolver la Estrategia Constante
+        private void ResolverConstante(int idx, int costoAcumulado, int valorPivote, int[] seq)
         {
-            ops[idx] = opStr;
-            valsDespues[idx] = nuevoValor;
-            costos[idx] = costoOp;
 
-            ResolverEstrategia(idx + 1, nuevoCosto, nuevoValor, esAscendente, seq, ops, valsDespues, costos, ref mejorCostoGlobal, mOps, mVals, mCostos);
-        }
-
-        // ====================================================================
-        // ALGORITMO EXCLUSIVO PARA COSTO CONSTANTE
-        // ====================================================================
-        private void ResolverConstanteRecursivo(int idx, int costoAcumulado, int valorPivote, int[] seq,
-            string[] ops, int[] valsDespues, int[] costos, ref int mejorCostoGlobal, string[] mOps, int[] mVals, int[] mCostos)
-        {
+            // Poda del Costo Acumulado
             if (costoAcumulado >= mejorCostoGlobal) return;
 
+            // Mejor Solucion Encontrada al Finalizar la Secuencia
             if (idx == seq.Length)
             {
                 mejorCostoGlobal = costoAcumulado;
-                Array.Copy(ops, mOps, seq.Length);
-                Array.Copy(valsDespues, mVals, seq.Length);
-                Array.Copy(costos, mCostos, seq.Length);
+                mejoresOperaciones = new List<string>(operacionesActuales);
+                mejoresValoresTransformados = new List<int>(valoresTransformadosActuales);
+                mejoresCostos = new List<int>(costosActuales);
                 return;
             }
 
+            // Obtener el Valor Original del Elemento Actual
             int valOriginal = seq[idx];
 
-            // Arreglos locales para iterar las 5 opciones de forma limpia
+            // Lista de Valores Posibles y sus Costos en Local
             int valDiv2 = (valOriginal % 2 == 0) ? (valOriginal / 2) : -1;
-            int[] opcionesValores = { valOriginal, valOriginal + 1, valOriginal - 1, valDiv2, valOriginal * 2 };
-            string[] opcionesOps = { "Ninguna", "+1", "-1", "/2", "*2" };
-            int[] opcionesCostos = { 0, costoMas1, costoMenos1, costoDiv2, costoPor2 };
+            int[] valoresPosibles = { valOriginal, valOriginal + 1, valOriginal - 1, valDiv2, valOriginal * 2 };
+            string[] opsPosibles = { "Ninguna", "+1", "-1", "/2", "*2" };
+            int[] costosPosibles = { 0, costoMas1, costoMenos1, costoDiv2, costoPor2 };
 
             for (int i = 0; i < 5; i++)
             {
-                int nuevoValor = opcionesValores[i];
-                if (nuevoValor < 0) continue; // Descarta divisiones impares o restas negativas
+                int nuevoValor = valoresPosibles[i];
 
-                // Si no es el primer elemento, el valor DEBE ser igual al pivote establecido al inicio
+                // Opciones Invalidas
+                if (nuevoValor < 0) continue;
+
+                // Buscar el Valor del Pivote para el Paso Actual
                 if (idx > 0 && nuevoValor != valorPivote) continue;
 
-                ops[idx] = opcionesOps[i];
-                valsDespues[idx] = nuevoValor;
-                costos[idx] = opcionesCostos[i];
+                // Pivote del Arbol
+                int pivoteParaSiguientePaso = (idx == 0) ? nuevoValor : valorPivote;
 
-                ResolverConstanteRecursivo(idx + 1, costoAcumulado + opcionesCostos[i], idx == 0 ? nuevoValor : valorPivote, seq, ops, valsDespues, costos, ref mejorCostoGlobal, mOps, mVals, mCostos);
+                ProbarPaso(idx, costoAcumulado + costosPosibles[i], nuevoValor, opsPosibles[i], costosPosibles[i], false, seq, true, pivoteParaSiguientePaso);
+
             }
         }
 
-        private Datos ConstruirDatos(int[] originales, string[] ops, int[] despues, int[] costos)
+        // Metodo para Probar un Paso en la Recursion
+        private void ProbarPaso(int idx, int nuevoCostoAcumulado, int nuevoValor, string opStr, int costoOp,
+            bool esAscendente, int[] seq, bool esEstrategiaConstante, int pivoteConstante = 0)
         {
+            // Registrar la Operación Actual y el Valor Transformado
+            operacionesActuales.Add(opStr);
+            valoresTransformadosActuales.Add(nuevoValor);
+            costosActuales.Add(costoOp);
+
+            // Llama Recurvia para el Siguiente Paso
+            if (esEstrategiaConstante)
+            {
+                ResolverConstante(idx + 1, nuevoCostoAcumulado, pivoteConstante, seq);
+            }
+            else
+            {
+                ResolverAscendenteDescendente(idx + 1, nuevoCostoAcumulado, nuevoValor, esAscendente, seq);
+            }
+
+            // Devolver al Estado Anterior o Limpiar Datos
+            operacionesActuales.RemoveAt(operacionesActuales.Count - 1);
+            valoresTransformadosActuales.RemoveAt(valoresTransformadosActuales.Count - 1);
+            costosActuales.RemoveAt(costosActuales.Count - 1);
+        }
+
+        // Metodo para Construir el Objeto de Datos de Salida
+        private Datos ConstruirDatosDeSalida(int[] originales)
+        {
+
             var datos = new Datos();
+
             for (int i = 0; i < originales.Length; i++)
             {
-                datos.Operaciones.Add((i, ops[i], originales[i], despues[i]));
-                datos.Costos.Add(costos[i]);
-                datos.Secuencia.Add(despues[i]);
+                // Guardar los Mejores Resultados en el Objeto de Salida
+                datos.Operaciones.Add((i, mejoresOperaciones[i], originales[i], mejoresValoresTransformados[i]));
+                datos.Costos.Add(mejoresCostos[i]);
+                datos.Secuencia.Add(mejoresValoresTransformados[i]);
             }
+
             return datos;
+
         }
     }
 
-    // Clase para Guardar Datos de Secuencia
     public class Datos
     {
         public List<(int indice, string operacion, int valorAntes, int valorDespues)> Operaciones { get; set; } = new List<(int, string, int, int)>();
