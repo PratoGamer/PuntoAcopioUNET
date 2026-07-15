@@ -240,15 +240,60 @@
                         <div class="overflow-y-auto vh-25" >
                             @foreach (var item in cargamentos)
                             {
-                                <div class="card mb-2 alert alert-success shadow-sm border-0">
-                                    <div class="card-body text-dark p-3">
-                                        <strong>Destino:</strong> <span class="badge bg-success mx-1">@item.Destino</span> <br />
-                                        <strong>Secuencia Despachada:</strong> <span class="badge bg-secondary mx-1">@string.Join(" → ", item.Secuencia)</span> <br />
-                                        <strong>Operación Elegida:</strong> <span class="badge bg-primary mx-1">@item.Metodo</span> <br />
-                                        <strong>Costo Logístico:</strong> <span class="badge bg-danger mx-1">@item.Costo pts</span>
-                                        <span class="small text-muted">(Límite: @item.Limite pts)</span>
-                                    </div>
-                                </div>
+                   <div class="card mb-3 shadow-sm border-start border-4 border-success">
+    <div class="card-header bg-success-subtle fw-bold">
+        <i class="bi bi-truck me-2"></i>
+        Despacho realizado
+    </div>
+
+    <div class="card-body">
+
+        <p class="mb-2">
+            <strong>Destino:</strong>
+            <span class="badge bg-success">@item.Destino</span>
+        </p>
+
+        <p class="mb-2">
+            <strong>Secuencia despachada:</strong><br />
+            @foreach (var valor in item.Secuencia)
+            {
+                <span class="badge bg-secondary me-1">@valor</span>
+            }
+        </p>
+
+        <p class="mb-2">
+            <strong>Operación elegida:</strong>
+            <span class="badge bg-primary">@item.Metodo</span>
+        </p>
+
+        <hr />
+
+        <p class="mb-1">
+            <i class="bi bi-cpu me-1 text-primary"></i>
+            <strong>Costo del algoritmo:</strong>
+            @(@item.Costo - @item.CostoManual) pts
+        </p>
+
+        <p class="mb-1">
+            <i class="bi bi-pencil-square me-1 text-warning"></i>
+            <strong>Costo de operaciones:</strong>
+            @item.CostoManual pts
+        </p>
+
+        <p class="mb-0">
+            <i class="bi bi-cash-stack me-1 text-danger"></i>
+            <strong>Costo logístico total:</strong>
+            <span class="badge bg-danger fs-6">
+                @item.Costo pts
+            </span>
+
+            <small class="text-muted ms-2">
+                (Límite: @item.Limite pts)
+            </small>
+        </p>
+
+    </div>
+</div>
                             }
                         </div>
                     }
@@ -262,7 +307,7 @@
 @code {
     private enum TipoItem { InsumosMedicos, AlimentosNoPerecederos, AguaPotable, RopaSabanas, Otros }
     private enum AccionFiltro { Sumar, Restar, Multiplicar, Dividir }
-
+    private int costoOperaciones = 0;
     // Listas independientes por cada categoría para resguardar la procedencia de los datos
     private List<int> listaInsumosMedicos = new();
     private List<int> listaAlimentosNoPerecederos = new();
@@ -278,7 +323,7 @@
     private string mejorMetodo = "";
     private int mejorCosto = 0;
 
-    private List<(string Destino, List<int> Secuencia, List<int> SecuenciaFinal, string Metodo, int Costo, int Limite)> cargamentos = new();
+    private List<(string Destino, List<int> Secuencia, List<int> SecuenciaFinal, string Metodo, int Costo,int CostoManual, int Limite)> cargamentos = new();
 
     private bool HayElementos => listaInsumosMedicos.Any() || listaAlimentosNoPerecederos.Any() ||
                                  listaAguaPotable.Any() || listaRopaSabanas.Any() || listaOtros.Any();
@@ -329,21 +374,34 @@
 
         int valorActual = targetList[index];
 
-        switch (accion)
+switch (accion)
+{
+    case AccionFiltro.Sumar:
+        targetList[index] = valorActual + 1;
+        costoOperaciones += 1;
+        break;
+
+    case AccionFiltro.Restar:
+        if (valorActual > 0)
         {
-            case AccionFiltro.Sumar:
-                targetList[index] = valorActual + 1;
-                break;
-            case AccionFiltro.Restar:
-                if (valorActual > 0) targetList[index] = valorActual - 1;
-                break;
-            case AccionFiltro.Multiplicar:
-                targetList[index] = valorActual * 2;
-                break;
-            case AccionFiltro.Dividir:
-                if (valorActual % 2 == 0) targetList[index] = valorActual / 2;
-                break;
+            targetList[index] = valorActual - 1;
+            costoOperaciones += 1;
         }
+        break;
+
+    case AccionFiltro.Multiplicar:
+        targetList[index] = valorActual * 2;
+        costoOperaciones += 3;
+        break;
+
+    case AccionFiltro.Dividir:
+        if (valorActual % 2 == 0)
+        {
+            targetList[index] = valorActual / 2;
+            costoOperaciones += 2;
+        }
+        break;
+}
         haCalculado = false;
     }
 
@@ -419,7 +477,7 @@
         if (mejorCosto != -1 && resultadoGanador != null)
         {
             List<int> secuenciaFinal = resultadoGanador.Operaciones.Select(op => op.valorDespues).ToList();
-            cargamentos.Add((destino, LogisticaService.secuenciaOriginal.ToList(), secuenciaFinal, mejorMetodo, mejorCosto, capacidadTransporte));
+            cargamentos.Add((destino, LogisticaService.secuenciaOriginal.ToList(), secuenciaFinal, mejorMetodo, mejorCosto +   costoOperaciones,costoOperaciones, capacidadTransporte));
 
             // Solo reseteamos los contenedores si se despachó con éxito
             destino = "";
@@ -430,6 +488,7 @@
             listaOtros.Clear();
             LogisticaService.secuenciaOriginal.Clear();
             nuevoNumero = 0;
+            costoOperaciones = 0;
         }
 
         isCalculating = false;
