@@ -1,4 +1,4 @@
-﻿<!-- Pagina Principal -->
+﻿﻿<!-- Pagina Principal -->
 @page "/"
 
 <!-- Dependencias a Usar -->
@@ -21,7 +21,7 @@
     <div class="row g-4">
 
         <!-- Panel Izquierdo de Configuracion -->
-        <div class="col-lg-6">
+        <div class="col-lg-4 col-md-5 col-12">
             <div class="card border-0 shadow-sm h-100 rounded-4">
                 <div class="card-body p-4">
                     <h5 class="card-title fw-bold mb-3 text-secondary">
@@ -65,7 +65,7 @@
                             <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
                                     style="background-color: #f3e8ff;" type="button"
                                     title="4. Ropa y Sábanas" @onclick="() => AgregarPorCategoria(TipoItem.RopaSabanas)" disabled="@(nuevoNumero < 0)">
-                                <i class="bi bi-smartwatch fs-5 text-info"></i>
+                                <i class="bi bi-backpack-fill fs-5 text-info"></i>
                             </button>
                             <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
                                     style="background-color: #ffedd5;" type="button"
@@ -79,8 +79,8 @@
                     <div class="mb-4">
                         <div class="d-flex gap-2 flex-wrap align-items-center">
                             <span class="text-muted small fw-bold">Presets:</span>
-                            <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem;" @onclick="CargarPresetSimple">Simple</button>
-                            <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem;" @onclick="CargarPresetMediano">Mediano</button>
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2 small"  @onclick="CargarPresetSimple">Simple</button>
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2 small"  @onclick="CargarPresetMediano">Mediano</button>
                         </div>
                     </div>
 
@@ -107,7 +107,7 @@
                         }
                         else
                         {
-                            <div class="d-flex flex-column gap-2 p-2 bg-light rounded-3 border" style="max-height: 280px; overflow-y: auto;">
+                            <div class="d-flex flex-column gap-2 p-2 bg-light rounded-3 border vh-25 overflow-y-auto" >
                                 @foreach (var item in ObtenerSecuenciaVisualEstructurada())
                                 {
                                     <div class="d-flex align-items-center justify-content-between p-2 rounded-3 border border-secondary border-opacity-10 shadow-sm transition-all"
@@ -121,14 +121,14 @@
 
                                         <!-- Panel de Operaciones Rápidas -->
                                         <div class="d-flex align-items-center gap-1">
-                                            <button class="btn btn-xs btn-light border py-0 px-2 rounded-2" title="Sumar 1" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Sumar)">+1</button>
-                                            <button class="btn btn-xs btn-light border py-0 px-2 rounded-2" title="Restar 1" disabled="@(item.Valor <= 0)" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Restar)">-1</button>
-                                            <button class="btn btn-xs btn-light border py-0 px-2 rounded-2" title="Multiplicar por 2" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Multiplicar)">×2</button>
-                                            <button class="btn btn-xs btn-light border py-0 px-2 rounded-2" title="Dividir por 2" disabled="@(item.Valor % 2 != 0)" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Dividir)">/2</button>
+                                            <button class="btn btn-sm   fs-6 btn-light border py-0 px-2 rounded-2" title="Sumar 1" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Sumar)">+1</button>
+                                            <button class="btn btn-sm   fs-6 btn-light border py-0 px-2 rounded-2" title="Restar 1" disabled="@(item.Valor <= 0)" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Restar)">-1</button>
+                                            <button class="btn btn-sm   fs-6 btn-light border py-0 px-2 rounded-2" title="Multiplicar por 2" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Multiplicar)">×2</button>
+                                            <button class="btn btn-sm   fs-6  btn-light border py-0 px-2 rounded-2" title="Dividir por 2" disabled="@(item.Valor % 2 != 0)" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Dividir)">/2</button>
 
-                                            <div class="vr mx-1 bg-secondary opacity-50" style="height: 18px;"></div>
+                                            <div class="vr  mx-1 bg-secondary opacity-50" ></div>
 
-                                            <button class="btn btn-xs btn-danger py-0 px-2 rounded-2 text-white border-0" title="Eliminar" @onclick="() => EliminarElemento(item.Tipo, item.IndexInterno)">
+                                            <button class="btn btn-sm   fs-6  py-0  btn-danger  px-2 rounded-2 text-white border-0" title="Eliminar" @onclick="() => EliminarElemento(item.Tipo, item.IndexInterno)">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
@@ -141,7 +141,7 @@
                     <!-- Datos Logísticos de Destino y Costo Máximo de Transporte -->
                     <div class="row g-3 mb-4">
                         <div class="col-md-7">
-                            <label class="form-label fw-bold text-muted small">Destino del Cargamento</label>
+                            <label class="form-label fw-bold text-muted small">Destino del Cargamento a Enviar</label>
                             <input class="form-control" @bind="destino" placeholder="Ej. San Cristóbal..." />
                         </div>
                         <div class="col-md-5">
@@ -173,7 +173,7 @@
         </div>
 
         <!-- Panel Derecho: Resultados -->
-        <div class="col-lg-6">
+        <div class="col-lg-8 col-md-7 col-12">
             <div class="card border-0 shadow-sm h-100 rounded-4">
                 <div class="card-body p-4">
                     <h5 class="card-title fw-bold mb-4 text-secondary">
@@ -237,7 +237,7 @@
                     @if (cargamentos.Any())
                     {
                         <h5 class="mt-4"><i class="bi bi-journal-text me-2"></i>Historial de Despachos</h5>
-                        <div class="overflow-auto" style="max-height: 250px;">
+                        <div class="overflow-y-auto vh-25" >
                             @foreach (var item in cargamentos)
                             {
                                 <div class="card mb-2 alert alert-success shadow-sm border-0">
@@ -495,7 +495,7 @@
         bool excedeCapacidad = resultado != null && resultado.Costos.Sum() > capacidadTransporte;
 
         <div class="card h-100 border-0 bg-white shadow-sm rounded-3 overflow-hidden" style="opacity: @(excedeCapacidad ? "0.6" : "1.0")">
-            <div class="card-header @colorClass d-flex justify-content-between align-items-center py-2 border-0" style="font-size: 0.85rem;">
+            <div class="card-header @colorClass d-flex justify-content-between align-items-center py-2 border-0 small">
                 <span class="fw-bold"><i class="bi @icon me-1"></i>@titulo</span>
                 @if (excedeCapacidad)
                 {
@@ -513,32 +513,32 @@
                 else
                 {
                     <div class="text-center mb-2 bg-light rounded-3 py-2 border">
-                        <span class="small text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Costo</span>
+                        <span class="small text-muted d-block text-uppercase fw-bold small">Costo</span>
                         <span class="fs-5 fw-bold @(excedeCapacidad ? "text-danger" : "text-success")">@resultado.Costos.Sum() pts</span>
                     </div>
                     <div class="mb-2">
-                        <span class="text-muted fw-bold d-block mb-1" style="font-size: 0.75rem;"><i class="bi bi-diagram-3 me-1"></i>Salida:</span>
+                        <span class="text-muted fw-bold d-block mb-1 small" ><i class="bi bi-diagram-3 me-1"></i>Salida:</span>
                         <div class="d-flex flex-wrap gap-1">
                             @foreach (var val in resultado.Secuencia)
                             {
-                                <span class="badge bg-secondary p-1 px-2 rounded" style="font-size: 0.7rem;">@val</span>
+                                <span class="badge bg-secondary p-1 px-2 rounded small" >@val</span>
                             }
                         </div>
                     </div>
                     <div>
-                        <span class="text-muted fw-bold d-block mb-1" style="font-size: 0.75rem;"><i class="bi bi-list-check me-1"></i>Cálculos:</span>
-                        <div class="timeline-visual" style="max-height: 120px; overflow-y: auto;">
+                        <span class="text-muted fw-bold d-block mb-1 small"><i class="bi bi-list-check me-1"></i>Cálculos:</span>
+                        <div class="timeline-visual  vh-25 overflow-y-auto" >
                             @for (int i = 0; i < resultado.Operaciones.Count; i++)
                             {
                                 var op = resultado.Operaciones[i];
                                 var costoOp = resultado.Costos[i];
-                                <div class="step-row d-flex align-items-center mb-1 p-1 rounded bg-light border-start border-3 border-success" style="font-size: 0.75rem;">
+                                <div class="step-row d-flex align-items-center mb-1 p-1 rounded bg-light border-start border-3 border-success small">
                                     <div class="d-flex align-items-center gap-1 flex-wrap">
                                         <span class="text-muted">@op.valorAntes</span>
-                                        <span class="badge bg-dark font-monospace" style="font-size: 0.65rem;">@op.operacion</span>
-                                        <i class="bi bi-arrow-right text-muted" style="font-size: 0.7rem;"></i>
+                                        <span class="badge bg-dark font-monospace small" >@op.operacion</span>
+                                        <i class="bi bi-arrow-right text-muted small"></i>
                                         <span class="fw-bold text-dark">@op.valorDespues</span>
-                                        <span class="text-secondary" style="font-size: 0.7rem;">(+@costoOp pts)</span>
+                                        <span class="text-secondary small">(+@costoOp pts)</span>
                                     </div>
                                 </div>
                             }
@@ -551,11 +551,7 @@
 }
 
 <style>
-    /* Clases de utilidad personalizadas */
-    .btn-xs {
-        padding: 1px 5px;
-        font-size: 0.75rem;
-    }
+  
 
     .transition-all {
         transition: all 0.2s ease-in-out;
