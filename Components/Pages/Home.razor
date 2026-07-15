@@ -1,23 +1,27 @@
-﻿@page "/"
+﻿<!-- Pagina Principal -->
+@page "/"
+
+<!-- Dependencias a Usar -->
 @using PuntoAcopioUNET.Services
 @inject LogisticaService LogisticaService
 
+<!-- Container Principal -->
 <div class="container-fluid py-4 bg-light min-vh-100">
 
     <!-- Encabezado Principal -->
     <div class="row mb-4">
         <div class="col-12 text-center text-md-start">
-            <h1 class="display-6 fw-bold text-dark mb-1"> <i class="bi bi-person-raised-hand"></i> Punto de Acopio UNET
+            <h1 class="display-6 fw-bold text-dark mb-1">
+                <i class="bi bi-building-fill-gear text-primary"></i> Punto de Acopio UNET
             </h1>
-            <p class="text-muted">Calculador de Costos Logísticos Optimizados <i class="bi bi-boxes"></i>
-            </p>
+            <p class="text-muted">Calculador de Costos Logísticos Optimizados con Límite de Transporte <i class="bi bi-truck"></i></p>
         </div>
     </div>
 
     <div class="row g-4">
 
-        <!-- Panel Izquierdo: Entrada de Datos -->
-        <div class="col-lg-4">
+        <!-- Panel Izquierdo de Configuracion -->
+        <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100 rounded-4">
                 <div class="card-body p-4">
                     <h5 class="card-title fw-bold mb-3 text-secondary">
@@ -25,375 +29,535 @@
                     </h5>
 
                     <!-- Entrada de Numeros -->
-                    <div class="mb-4">
-                        <label class="form-label text-muted small fw-bold">Ingresar Número Entero (Solo
-                            positivos)</label>
-                            <div class="input-group">
-                                <input type="number" min="0" @bind="nuevoNumero" @bind:event="oninput"
-                                       @onkeyup="HandleKeyUp" class="form-control border-end-0 py-2 rounded-start-3"
-                                       placeholder="Ej. 15" />
-                                <button class="btn btn-primary px-4 rounded-end-3" type="button" @onclick="AgregarNumero"
-                                        disabled="@(nuevoNumero < 0)">
-                                    <i class="bi bi-plus me-1"></i> Añadir
-                                </button>
-                            </div>
-                            @if (nuevoNumero < 0)
-                            {
-                                <span class="text-danger small mt-1 d-block"><i class="bi bi-exclamation-circle-fill me-1"></i>
-                                    No se permiten números negativos.</span>
-                                }
-                            </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Cantidad de Elementos (Solo positivos)</label>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text bg-white"><i class="bi bi-hash"></i></span>
+                            <input type="number" min="0" @bind="nuevoNumero" @bind:event="oninput"
+                                   class="form-control py-2" placeholder="Ej. 15" />
+                        </div>
 
-                            <!-- Valores de Prueba Rapida -->
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Pruebas Rápidas</label>
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <button class="btn btn-sm btn-outline-secondary rounded-pill"
-                                            @onclick="() => CargarPreset(new int[] { 10, 5, 20 })">Caso Simple</button>
-                                    <button class="btn btn-sm btn-outline-secondary rounded-pill"
-                                            @onclick="() => CargarPreset(new int[] { 4, 8, 3, 12 })">Caso Mediano</button>
-                                    <button class="btn btn-sm btn-outline-secondary rounded-pill"
-                                            @onclick="() => CargarPreset(new int[] { 3, 6, 12, 2, 4 })">Caso Grande</button>
-                                </div>
-                            </div>
+                        @if (nuevoNumero < 0)
+                        {
+                            <span class="text-danger small mt-1 d-block mb-3">
+                                <i class="bi bi-exclamation-circle-fill me-1"></i> No se permiten números negativos.
+                            </span>
+                        }
 
-                            <hr class="text-muted my-3" />
-
-                            <!-- Secuencia Original -->
-                            <div class="mb-4">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <label class="form-label text-muted small fw-bold mb-0">Secuencia Original</label>
-                                    @if (LogisticaService.secuenciaOriginal.Any())
-                                    {
-                                        <button class="btn btn-sm text-danger p-0 border-0 bg-transparent" @onclick="LimpiarTodo">
-                                            <i class="bi bi-trash-fill me-1"></i>Limpiar Todo
-                                        </button>
-                                    }
-                                </div>
-
-                                @if (!LogisticaService.secuenciaOriginal.Any())
-                                {
-                                    <div class="text-center py-4 bg-light rounded-3 text-muted border border-dark border-2">
-                                        <i class="bi bi-list-ol d-block fs-3 mb-2 opacity-50"></i>
-                                        <span class="small">La secuencia está vacía. Añade números para comenzar.</span>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="d-flex flex-wrap gap-2 p-3 bg-light rounded-3 border">
-                                        @for (int i = 0; i < LogisticaService.secuenciaOriginal.Count; i++)
-                                        {
-                                            int index = i;
-                                            <span
-                                                class="badge bg-dark fs-6 py-2 px-3 rounded-pill d-inline-flex align-items-center gap-2 shadow-sm ">
-                                                @LogisticaService.secuenciaOriginal[index]
-                                                <i class="bi bi-x text-danger opacity-75 opacity-100-hover " role="button"
-                                                   @onclick="() => EliminarNumero(index)"></i>
-                                            </span>
-                                        }
-                                    </div>
-                                }
-                            </div>
-
-                            <!-- Destino del Cargamento -->
-                            <label class="form-label fw-bold text-muted">
-                                Destino del Cargamento
-                            </label>
-                            <input class="form-control my-2" @bind="destino" placeholder="Ej. Caracas, Vargas, La Guaira..." />
-
-                            <!-- Boton para Calcular -->
-                            <button class="btn btn-success w-100 py-3 rounded-3 fw-bold fs-5 shadow-sm text-white"
-                                    @onclick="ProcesarCalculo"
-                                    disabled="@(isCalculating || !LogisticaService.secuenciaOriginal.Any()|| string.IsNullOrWhiteSpace(destino))">
-                                @if (isCalculating)
-                                {
-                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                    <span>Procesando Árbol...</span>
-                                }
-                                else
-                                {
-                                    <span><i class="bi bi-lightning-charge-fill me-2"></i>Calcular Logística</span>
-                                }
+                        <!-- Botones de Categorías en una Única Fila Horizontal -->
+                        <label class="form-label text-muted small fw-bold d-block mb-2">Clasificar y Añadir Tipo:</label>
+                        <div class="d-flex justify-content-between gap-1">
+                            <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
+                                    style="background-color: #e2e8f0;" type="button"
+                                    title="1. Insumos Médicos" @onclick="() => AgregarPorCategoria(TipoItem.InsumosMedicos)" disabled="@(nuevoNumero < 0)">
+                                <i class="bi bi-capsule fs-5"></i>
                             </button>
+                            <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
+                                    style="background-color: #fef3c7;" type="button"
+                                    title="2. Alimentos No Perecederos" @onclick="() => AgregarPorCategoria(TipoItem.AlimentosNoPerecederos)" disabled="@(nuevoNumero < 0)">
+                                <i class="bi bi-egg-fried fs-5 text-warning"></i>
+                            </button>
+                            <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
+                                    style="background-color: #e0f2fe;" type="button"
+                                    title="3. Agua Potable" @onclick="() => AgregarPorCategoria(TipoItem.AguaPotable)" disabled="@(nuevoNumero < 0)">
+                                <i class="bi bi-droplet-fill fs-5 text-primary"></i>
+                            </button>
+                            <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
+                                    style="background-color: #f3e8ff;" type="button"
+                                    title="4. Ropa y Sábanas" @onclick="() => AgregarPorCategoria(TipoItem.RopaSabanas)" disabled="@(nuevoNumero < 0)">
+                                <i class="bi bi-smartwatch fs-5 text-info"></i>
+                            </button>
+                            <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
+                                    style="background-color: #ffedd5;" type="button"
+                                    title="5. Otros Especiales" @onclick="() => AgregarPorCategoria(TipoItem.Otros)" disabled="@(nuevoNumero < 0)">
+                                <i class="bi bi-box-seam fs-5 text-danger"></i>
+                            </button>
+                        </div>
+                    </div>
 
+                    <!-- Valores de Prueba Rápida -->
+                    <div class="mb-4">
+                        <div class="d-flex gap-2 flex-wrap align-items-center">
+                            <span class="text-muted small fw-bold">Presets:</span>
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem;" @onclick="CargarPresetSimple">Simple</button>
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" style="font-size: 0.75rem;" @onclick="CargarPresetMediano">Mediano</button>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted my-3" />
+
+                    <!-- Secuencia Interactiva -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label text-muted small fw-bold mb-0">Secuencia (1 a 5 con Controles Rápidos)</label>
+                            @if (HayElementos)
+                            {
+                                <button class="btn btn-sm text-danger p-0 border-0 bg-transparent" @onclick="LimpiarTodo">
+                                    <i class="bi bi-trash-fill me-1"></i>Limpiar Todo
+                                </button>
+                            }
                         </div>
 
+                        @if (!HayElementos)
+                        {
+                            <div class="text-center py-4 bg-light rounded-3 text-muted border border-secondary border-dashed">
+                                <i class="bi bi-list-ol d-block fs-3 mb-2 opacity-50"></i>
+                                <span class="small">Sin elementos. Clasifica valores para construir la secuencia.</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-column gap-2 p-2 bg-light rounded-3 border" style="max-height: 280px; overflow-y: auto;">
+                                @foreach (var item in ObtenerSecuenciaVisualEstructurada())
+                                {
+                                    <div class="d-flex align-items-center justify-content-between p-2 rounded-3 border border-secondary border-opacity-10 shadow-sm transition-all"
+                                         style="background-color: @ObtenerColorPastel(item.Tipo);">
+
+                                        <!-- Identificador del item -->
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge bg-dark text-white rounded-circle font-monospace">@ObtenerPrefijoCategoria(item.Tipo)</span>
+                                            <strong class="fs-5">@item.Valor</strong>
+                                        </div>
+
+                                        <!-- Panel de Operaciones Rápidas -->
+                                        <div class="d-flex align-items-center gap-1">
+                                            <button class="btn btn-xs btn-light border py-0 px-2 rounded-2" title="Sumar 1" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Sumar)">+1</button>
+                                            <button class="btn btn-xs btn-light border py-0 px-2 rounded-2" title="Restar 1" disabled="@(item.Valor <= 0)" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Restar)">-1</button>
+                                            <button class="btn btn-xs btn-light border py-0 px-2 rounded-2" title="Multiplicar por 2" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Multiplicar)">×2</button>
+                                            <button class="btn btn-xs btn-light border py-0 px-2 rounded-2" title="Dividir por 2" disabled="@(item.Valor % 2 != 0)" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Dividir)">/2</button>
+
+                                            <div class="vr mx-1 bg-secondary opacity-50" style="height: 18px;"></div>
+
+                                            <button class="btn btn-xs btn-danger py-0 px-2 rounded-2 text-white border-0" title="Eliminar" @onclick="() => EliminarElemento(item.Tipo, item.IndexInterno)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
-                </div>
 
-                <!-- Panel Derecho: Resultados -->
-                <div class="col-lg-8">
-                    <div class="card border-0 shadow-sm h-100 rounded-4">
-                        <div class="card-body p-4">
-                            <h5 class="card-title fw-bold mb-4 text-secondary">
-                                <i class="bi bi-bar-chart-line-fill me-2 text-success"></i>Resultados del Análisis de Costos
-                            </h5>
-
-                            @if (!haCalculado && !isCalculating)
-                            {
-                                <div class="text-center py-5 my-5 text-muted">
-
-                                    <div class="mb-4 text-secondary">
-                                        <i class="bi bi-box-seam fs-1"></i>
-                                    </div>
-                                    <h4>Listo para Calcular</h4>
-                                    <p class="text-muted col-10 col-md-8 mx-auto">
-                                        Configura la Secuencia de Cajas en el Panel de la Izquierda y Haz Clic en "Calcular
-                                        Logística".
-                                    </p>
-                                </div>
-
-                            }
-                            else if (isCalculating)
-                            {
-                                <div class="text-center py-5 my-5">
-                                    <div class="spinner-grow text-success" role="status">
-                                        <span class="visually-hidden">Calculando...</span>
-                                    </div>
-                                    <h4 class="mt-4 fw-bold">Procesando Hilos en Segundo Plano</h4>
-                                    <p class="text-muted col-10 col-md-8 mx-auto">Ejecutando tres algoritmos asíncronos recursivos
-                                        en paralelo, aplicando poda extrema de ramas de costo mayor a @LogisticaService.poda.</p>
-                                    </div>
-                                }
-                            else
-                                {
-                                    <!-- Grid de 3 Columnas para los Resultados -->
-                                    <div class="row g-4">
-
-                                        <div class="col-lg-4 col-md-6">
-
-                                            @RenderCardResultados(
-                                                        "Mínimo Ascendente",
-                                                        "bi-graph-up-arrow",
-                                                        "bg-primary-subtle text-primary border-top border-4 border-primary",
-                                                        LogisticaService.ResultadoAscendente)
-                                        </div>
-
-                                        <div class="col-lg-4 col-md-6">
-                                            @RenderCardResultados(
-                                                "Mínimo Descendente",
-                                                "bi-graph-down-arrow",
-                                                "bg-info-subtle text-info-emphasis border-top border-4 border-info",
-                                                LogisticaService.ResultadoDescendente)
-                                        </div>
-
-                                        <div class="col-lg-4 col-md-12">
-                                            @RenderCardResultados(
-                                                "Mínimo Constante",
-                                                "bi-dash-circle-fill",
-                                                "bg-warning-subtle text-warning-emphasis border-top border-4 border-warning",
-                                                LogisticaService.ResultadoConstante)
-                                        </div>
-
-                                    </div>
-                                }
-                                @if (cargamentos.Any())
-                                {
-                                    <h5 class="mt-4">Historial de Cargamentos <i class="bi bi-book-half"></i> </h5>
-
-                                    @foreach (var item in cargamentos)
-                                    {
-                                        <div class="card mb-2 alert alert-success shadow-sm mt-3">
-                                            <div class="card-body">
-                                                <strong>Destino:</strong> <span class="badge bg-success small"> @item.Destino</span> <br />
-                                                <strong>Secuencia Inicial:</strong> <span class="badge bg-success small">@string.Join(" → ", item.Secuencia)</span> <br />
-                                                <strong>Secuencia Final:</strong> <span class="badge bg-success small">@string.Join(" → ", item.SecuenciaFinal)</span> <br />
-                                                <strong>Método:</strong> <span class="badge bg-success small">@item.Metodo</span> <br />
-                                                <strong>Costo:</strong> <span class="badge bg-success small"> @item.Costo pts</span>
-                                            </div>
-                                        </div>
-                                    }
-                                }
+                    <!-- Datos Logísticos de Destino y Costo Máximo de Transporte -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-7">
+                            <label class="form-label fw-bold text-muted small">Destino del Cargamento</label>
+                            <input class="form-control" @bind="destino" placeholder="Ej. San Cristóbal..." />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold text-muted small">Costo Máx. del Transporte</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-wallet2 text-success"></i></span>
+                                <input type="number" min="1" class="form-control" @bind="capacidadTransporte" placeholder="Puntos" />
                             </div>
                         </div>
                     </div>
+
+                    <!-- Botón para Calcular -->
+                    <button class="btn btn-success w-100 py-3 rounded-3 fw-bold fs-5 shadow-sm text-white"
+                            @onclick="ProcesarCalculo"
+                            disabled="@(isCalculating || !HayElementos || string.IsNullOrWhiteSpace(destino) || capacidadTransporte <= 0)">
+                        @if (isCalculating)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Procesando Árbol...</span>
+                        }
+                        else
+                        {
+                            <span><i class="bi bi-lightning-charge-fill me-2"></i>Calcular Logística</span>
+                        }
+                    </button>
+
                 </div>
             </div>
-
-@code {
-
-    // Variables de Estado
-    private int nuevoNumero = 0;
-    private bool isCalculating = false;
-    private bool haCalculado = false;
-    private List<(string Destino, List<int> Secuencia, List<int> SecuenciaFinal, string Metodo, int Costo)> cargamentos =
-  new();
-    private string destino = "";
-
-    // Metodo para Obtener la Mejor Opcion de Costo
-    // Método refactorizado que devuelve el objeto del mejor resultado
-    private (string Metodo, int Costo, Datos? Resultado) ObtenerMejorOpcion()
-    {
-        var opciones = new List<(string Metodo, Datos Resultado)>
-    {
-        ("Ascendente", LogisticaService.ResultadoAscendente),
-        ("Descendente", LogisticaService.ResultadoDescendente),
-        ("Constante", LogisticaService.ResultadoConstante)
-    };
-
-        var mejor = opciones
-            .Where(x => x.Resultado != null)
-            .OrderBy(x => x.Resultado.Costos.Sum())
-            .FirstOrDefault();
-
-        if (mejor.Resultado != null)
-        {
-            return (mejor.Metodo, mejor.Resultado.Costos.Sum(), mejor.Resultado);
-        }
-
-        return ("Sin solución", 0, null);
-    }
-    // Agregar número a la secuencia
-    private void AgregarNumero()
-    {
-        if (nuevoNumero >= 0)
-        {
-            LogisticaService.secuenciaOriginal.Add(nuevoNumero);
-            nuevoNumero = 0;
-        }
-    }
-
-    // Detectar Enter en la caja de texto
-    private void HandleKeyUp(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            AgregarNumero();
-        }
-    }
-
-    // Cargar un preset de pruebas
-    private void CargarPreset(int[] numeros)
-    {
-        LogisticaService.secuenciaOriginal = numeros.ToList();
-        haCalculado = false;
-    }
-
-    // Eliminar número individual
-    private void EliminarNumero(int index)
-    {
-        LogisticaService.secuenciaOriginal.RemoveAt(index);
-        haCalculado = false;
-    }
-
-    // Vaciar lista
-    private void LimpiarTodo()
-    {
-        LogisticaService.secuenciaOriginal.Clear();
-        haCalculado = false;
-    }
-
-    // Invocar cálculo asíncrono
-    private async Task ProcesarCalculo()
-    {
-        if (string.IsNullOrWhiteSpace(destino))
-        {
-            return;
-        }
-        if (!LogisticaService.secuenciaOriginal.Any()) return;
-
-        isCalculating = true;
-        haCalculado = false;
-        StateHasChanged(); // Renderiza el Spinner inmediatamente
-
-        // Pausa Corta para Mostrar el Spinner
-        await Task.Delay(500);
-
-        // Se ejecuta en hilos de fondo de manera fluida
-        await LogisticaService.CalcularOrden();
-        var (metodo, costo, resultadoGanador) = ObtenerMejorOpcion();
-        // Actualizamos las variables de estado
-        mejorMetodo = metodo;
-        mejorCosto = costo;
-        // Extraemos los valorDespues directamente del resultado devuelto
-        List<int> secuenciaFinal = resultadoGanador?.Operaciones
-            .Select(op => op.valorDespues)
-            .ToList() ?? new List<int>();
-        cargamentos.Add((
-    destino,
-        LogisticaService.secuenciaOriginal.ToList(),
-        secuenciaFinal,
-        mejorMetodo,
-        mejorCosto
-        ));
-
-        // Limpiar para una Nueva Entrada
-        destino = "";
-        LogisticaService.secuenciaOriginal.Clear();
-        nuevoNumero = 0;
-        isCalculating = false;
-        haCalculado = true;
-
-    }
-
-    private string mejorMetodo = "";
-    private int mejorCosto = 0;
-
-    // Fragmento para las Tarjetas de Resultados
-    private RenderFragment RenderCardResultados(string titulo, string icon, string colorClass, Datos resultado) => __builder
-=>
-    {
-    <div class="card h-100 border-0 bg-white shadow-sm rounded-3 overflow-hidden">
-        <div class="card-header @colorClass d-flex justify-content-between align-items-center py-3 border-0">
-            <span class="fw-bold"><i class="bi @icon me-2"></i>@titulo</span>
         </div>
-        <div class="card-body p-3">
-            @if (resultado == null)
-            {
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-diagram-3-fill fs-4 d-block mb-2 opacity-50"></i>
-                    <span class="small fw-semibold text-danger">Poda Excedida (> @LogisticaService.poda)</span>
-                    <p class="small text-muted mt-1 mb-0">No se halló solución con costo menor al límite.</p>
-                </div>
-            }
-            else
-            {
-                <!-- Costo Total Acumulado -->
-                <div class="text-center mb-3 bg-light rounded-3 py-2 border">
-                    <span class="small text-muted d-block text-uppercase fw-bold ">Costo Total</span>
-                    <span class="fs-4 fw-bold text-success">@resultado.Costos.Sum() ptos</span>
-                </div>
 
-                <!-- Secuencia Resultante -->
-                <div class="mb-3">
-                    <span class="small text-muted fw-bold d-block mb-1"><i class="bi bi-diagram-3 me-2"></i>Secuencia
-                        Final:</span>
-                        <div class="d-flex flex-wrap gap-1">
-                            @foreach (var val in resultado.Secuencia)
-                            {
-                                <span class="badge bg-secondary p-1 px-2 rounded">@val</span>
-                            }
-                        </div>
-                    </div>
+        <!-- Panel Derecho: Resultados -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100 rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-bold mb-4 text-secondary">
+                        <i class="bi bi-bar-chart-line-fill me-2 text-success"></i>Resultados del Análisis de Costos
+                    </h5>
 
-                    <!-- Lista de Operaciones -->
-                    <div>
-                        <span class="small text-muted fw-bold d-block mb-2"><i class="bi bi-list-check me-2"></i>Pasos
-                            Ejecutados:</span>
-                            <div class="timeline-visual">
-                                @for (int i = 0; i < resultado.Operaciones.Count; i++)
-                                {
-                                    var op = resultado.Operaciones[i];
-                                    var costoOp = resultado.Costos[i];
-                                    <div
-                                        class="step-row d-flex align-items-center mb-2 p-2 rounded bg-light border-start border-3 border-success">
-                                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                                            <span class="text-muted small">@op.valorAntes</span>
-                                            <span class="badge bg-dark font-monospace small">@op.operacion</span>
-                                            <i class="bi bi-arrow-right text-muted small"></i>
-                                            <span class="fw-bold text-dark">@op.valorDespues</span>
-
-                                            <span class="badge border border-secondary text-secondary small text-nowrap">+$@costoOp</span>
-                                        </div>
-                                    </div>
-                                }
+                    <!-- Alerta de Bloqueo por Exceso de Presupuesto del Transporte -->
+                    @if (haCalculado && mejorCosto == -1)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center rounded-3 shadow-sm border-0 mb-4" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-danger"></i>
+                            <div>
+                                <h6 class="alert-heading fw-bold mb-1">¡Cargamento Retenido!</h6>
+                                <p class="mb-0 small">
+                                    Ninguna de las rutas cumple con la condición del transporte (Capacidad: <strong>@capacidadTransporte pts</strong>). El costo operacional excede el límite financiero asignado.
+                                </p>
                             </div>
+                        </div>
+                    }
+
+                    @if (!haCalculado && !isCalculating)
+                    {
+                        <div class="text-center py-5 my-5 text-muted">
+                            <div class="mb-4 text-secondary">
+                                <i class="bi bi-box-seam fs-1"></i>
+                            </div>
+                            <h4>Listo para Calcular</h4>
+                            <p class="text-muted col-10 col-md-8 mx-auto">
+                                Configura la Secuencia estructurada e introduce destino y el costo máximo del transporte.
+                            </p>
+                        </div>
+                    }
+                    else if (isCalculating)
+                    {
+                        <div class="text-center py-5 my-5">
+                            <div class="spinner-grow text-success" role="status">
+                                <span class="visually-hidden">Calculando...</span>
+                            </div>
+                            <h4 class="mt-4 fw-bold">Optimizando Hilos en Paralelo</h4>
+                            <p class="text-muted col-10 col-md-8 mx-auto">
+                                Evaluando podas recursivas y costos dinámicos de transporte contra la capacidad máxima.
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Grid de los Métodos Evaluados -->
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                @RenderCardResultados("Mínimo Ascendente", "bi-graph-up-arrow", "bg-primary-subtle text-primary border-top border-4 border-primary", LogisticaService.ResultadoAscendente)
+                            </div>
+                            <div class="col-md-4">
+                                @RenderCardResultados("Mínimo Descendente", "bi-graph-down-arrow", "bg-info-subtle text-info-emphasis border-top border-4 border-info", LogisticaService.ResultadoDescendente)
+                            </div>
+                            <div class="col-md-4">
+                                @RenderCardResultados("Mínimo Constante", "bi-dash-circle-fill", "bg-warning-subtle text-warning-emphasis border-top border-4 border-warning", LogisticaService.ResultadoConstante)
+                            </div>
+                        </div>
+                    }
+
+                    @if (cargamentos.Any())
+                    {
+                        <h5 class="mt-4"><i class="bi bi-journal-text me-2"></i>Historial de Despachos</h5>
+                        <div class="overflow-auto" style="max-height: 250px;">
+                            @foreach (var item in cargamentos)
+                            {
+                                <div class="card mb-2 alert alert-success shadow-sm border-0">
+                                    <div class="card-body text-dark p-3">
+                                        <strong>Destino:</strong> <span class="badge bg-success mx-1">@item.Destino</span> <br />
+                                        <strong>Secuencia Despachada:</strong> <span class="badge bg-secondary mx-1">@string.Join(" → ", item.Secuencia)</span> <br />
+                                        <strong>Operación Elegida:</strong> <span class="badge bg-primary mx-1">@item.Metodo</span> <br />
+                                        <strong>Costo Logístico:</strong> <span class="badge bg-danger mx-1">@item.Costo pts</span>
+                                        <span class="small text-muted">(Límite: @item.Limite pts)</span>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                 </div>
             </div>
-        }
-        ;
+        </div>
 
+    </div>
+</div>
+
+@code {
+    private enum TipoItem { InsumosMedicos, AlimentosNoPerecederos, AguaPotable, RopaSabanas, Otros }
+    private enum AccionFiltro { Sumar, Restar, Multiplicar, Dividir }
+
+    // Listas independientes por cada categoría para resguardar la procedencia de los datos
+    private List<int> listaInsumosMedicos = new();
+    private List<int> listaAlimentosNoPerecederos = new();
+    private List<int> listaAguaPotable = new();
+    private List<int> listaRopaSabanas = new();
+    private List<int> listaOtros = new();
+
+    private int nuevoNumero = 0;
+    private int capacidadTransporte = 100; // Por defecto asignamos un límite estándar
+    private bool isCalculating = false;
+    private bool haCalculado = false;
+    private string destino = "";
+    private string mejorMetodo = "";
+    private int mejorCosto = 0;
+
+    private List<(string Destino, List<int> Secuencia, List<int> SecuenciaFinal, string Metodo, int Costo, int Limite)> cargamentos = new();
+
+    private bool HayElementos => listaInsumosMedicos.Any() || listaAlimentosNoPerecederos.Any() ||
+                                 listaAguaPotable.Any() || listaRopaSabanas.Any() || listaOtros.Any();
+
+    private void AgregarPorCategoria(TipoItem tipo)
+    {
+        if (nuevoNumero < 0) return;
+
+        switch (tipo)
+        {
+            case TipoItem.InsumosMedicos: listaInsumosMedicos.Add(nuevoNumero); break;
+            case TipoItem.AlimentosNoPerecederos: listaAlimentosNoPerecederos.Add(nuevoNumero); break;
+            case TipoItem.AguaPotable: listaAguaPotable.Add(nuevoNumero); break;
+            case TipoItem.RopaSabanas: listaRopaSabanas.Add(nuevoNumero); break;
+            case TipoItem.Otros: listaOtros.Add(nuevoNumero); break;
+        }
+        nuevoNumero = 0;
+        haCalculado = false;
     }
 
+    private void EliminarElemento(TipoItem tipo, int index)
+    {
+        switch (tipo)
+        {
+            case TipoItem.InsumosMedicos: listaInsumosMedicos.RemoveAt(index); break;
+            case TipoItem.AlimentosNoPerecederos: listaAlimentosNoPerecederos.RemoveAt(index); break;
+            case TipoItem.AguaPotable: listaAguaPotable.RemoveAt(index); break;
+            case TipoItem.RopaSabanas: listaRopaSabanas.RemoveAt(index); break;
+            case TipoItem.Otros: listaOtros.RemoveAt(index); break;
+        }
+        haCalculado = false;
+    }
+
+    // Ejecuta operaciones matemáticas controlando de manera precisa la lista que lo hospeda
+    private void OperarElemento(TipoItem tipo, int index, AccionFiltro accion)
+    {
+        List<int> targetList = tipo switch
+        {
+            TipoItem.InsumosMedicos => listaInsumosMedicos,
+            TipoItem.AlimentosNoPerecederos => listaAlimentosNoPerecederos,
+            TipoItem.AguaPotable => listaAguaPotable,
+            TipoItem.RopaSabanas => listaRopaSabanas,
+            TipoItem.Otros => listaOtros,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        if (index < 0 || index >= targetList.Count) return;
+
+        int valorActual = targetList[index];
+
+        switch (accion)
+        {
+            case AccionFiltro.Sumar:
+                targetList[index] = valorActual + 1;
+                break;
+            case AccionFiltro.Restar:
+                if (valorActual > 0) targetList[index] = valorActual - 1;
+                break;
+            case AccionFiltro.Multiplicar:
+                targetList[index] = valorActual * 2;
+                break;
+            case AccionFiltro.Dividir:
+                if (valorActual % 2 == 0) targetList[index] = valorActual / 2;
+                break;
+        }
+        haCalculado = false;
+    }
+
+    private List<(int Valor, TipoItem Tipo, int IndexInterno)> ObtenerSecuenciaVisualEstructurada()
+    {
+        var listaVisual = new List<(int Valor, TipoItem Tipo, int IndexInterno)>();
+
+        listaVisual.AddRange(listaInsumosMedicos.Select((v, i) => (v, TipoItem.InsumosMedicos, i)));
+        listaVisual.AddRange(listaAlimentosNoPerecederos.Select((v, i) => (v, TipoItem.AlimentosNoPerecederos, i)));
+        listaVisual.AddRange(listaAguaPotable.Select((v, i) => (v, TipoItem.AguaPotable, i)));
+        listaVisual.AddRange(listaRopaSabanas.Select((v, i) => (v, TipoItem.RopaSabanas, i)));
+        listaVisual.AddRange(listaOtros.Select((v, i) => (v, TipoItem.Otros, i)));
+
+        return listaVisual;
+    }
+
+    private void ConsolidarSecuenciaOriginal()
+    {
+        LogisticaService.secuenciaOriginal.Clear();
+        LogisticaService.secuenciaOriginal.AddRange(listaInsumosMedicos);
+        LogisticaService.secuenciaOriginal.AddRange(listaAlimentosNoPerecederos);
+        LogisticaService.secuenciaOriginal.AddRange(listaAguaPotable);
+        LogisticaService.secuenciaOriginal.AddRange(listaRopaSabanas);
+        LogisticaService.secuenciaOriginal.AddRange(listaOtros);
+    }
+
+    private string ObtenerColorPastel(TipoItem tipo)
+    {
+        return tipo switch
+        {
+            TipoItem.InsumosMedicos => "#f1f5f9",         // Gris claro
+            TipoItem.AlimentosNoPerecederos => "#fffbeb", // Amarillo crema
+            TipoItem.AguaPotable => "#f0f9ff",            // Azul cielo
+            TipoItem.RopaSabanas => "#faf5ff",            // Lavanda
+            TipoItem.Otros => "#fff7ed",                  // Melocotón
+            _ => "#ffffff"
+        };
+    }
+
+    private string ObtenerPrefijoCategoria(TipoItem tipo)
+    {
+        return tipo switch
+        {
+            TipoItem.InsumosMedicos => "1.MED",
+            TipoItem.AlimentosNoPerecederos => "2.ALM",
+            TipoItem.AguaPotable => "3.AGU",
+            TipoItem.RopaSabanas => "4.ROP",
+            TipoItem.Otros => "5.OTR",
+            _ => "ITEM"
+        };
+    }
+
+    private async Task ProcesarCalculo()
+    {
+        if (string.IsNullOrWhiteSpace(destino) || !HayElementos || capacidadTransporte <= 0) return;
+
+        isCalculating = true;
+        haCalculado = false;
+        StateHasChanged();
+
+        await Task.Delay(400);
+
+        ConsolidarSecuenciaOriginal();
+
+        await LogisticaService.CalcularOrden();
+
+        var (metodo, costo, resultadoGanador) = ObtenerMejorOpcionFiltrada();
+
+        mejorMetodo = metodo;
+        mejorCosto = costo;
+
+        // Si es un despacho viable (cumple el costo máximo de transporte)
+        if (mejorCosto != -1 && resultadoGanador != null)
+        {
+            List<int> secuenciaFinal = resultadoGanador.Operaciones.Select(op => op.valorDespues).ToList();
+            cargamentos.Add((destino, LogisticaService.secuenciaOriginal.ToList(), secuenciaFinal, mejorMetodo, mejorCosto, capacidadTransporte));
+
+            // Solo reseteamos los contenedores si se despachó con éxito
+            destino = "";
+            listaInsumosMedicos.Clear();
+            listaAlimentosNoPerecederos.Clear();
+            listaAguaPotable.Clear();
+            listaRopaSabanas.Clear();
+            listaOtros.Clear();
+            LogisticaService.secuenciaOriginal.Clear();
+            nuevoNumero = 0;
+        }
+
+        isCalculating = false;
+        haCalculado = true;
+    }
+
+    // Filtra las opciones de cálculo que cumplan con la capacidad del transporte y toma el menor costo de ellas
+    private (string Metodo, int Costo, Datos? Resultado) ObtenerMejorOpcionFiltrada()
+    {
+        var opciones = new List<(string Metodo, Datos Resultado)>
+        {
+            ("Ascendente", LogisticaService.ResultadoAscendente),
+            ("Descendente", LogisticaService.ResultadoDescendente),
+            ("Constante", LogisticaService.ResultadoConstante)
+        };
+
+        // Filtramos solo los hilos válidos que no superaron el costo de transporte definido por el usuario
+        var viables = opciones
+            .Where(x => x.Resultado != null && x.Resultado.Costos.Sum() <= capacidadTransporte)
+            .OrderBy(x => x.Resultado.Costos.Sum())
+            .ToList();
+
+        if (!viables.Any())
+        {
+            return ("Sin ruta viable", -1, null); // Código -1 representa error de transporte excedido
+        }
+
+        var mejor = viables.First();
+        return (mejor.Metodo, mejor.Resultado.Costos.Sum(), mejor.Resultado);
+    }
+
+    private void LimpiarTodo()
+    {
+        listaInsumosMedicos.Clear();
+        listaAlimentosNoPerecederos.Clear();
+        listaAguaPotable.Clear();
+        listaRopaSabanas.Clear();
+        listaOtros.Clear();
+        LogisticaService.secuenciaOriginal.Clear();
+        haCalculado = false;
+    }
+
+    private void CargarPresetSimple()
+    {
+        LimpiarTodo();
+        listaInsumosMedicos.AddRange(new[] { 10 });
+        listaAlimentosNoPerecederos.AddRange(new[] { 5 });
+        listaAguaPotable.AddRange(new[] { 20 });
+        haCalculado = false;
+    }
+
+    private void CargarPresetMediano()
+    {
+        LimpiarTodo();
+        listaInsumosMedicos.AddRange(new[] { 4, 8 });
+        listaAguaPotable.AddRange(new[] { 3 });
+        listaOtros.AddRange(new[] { 12 });
+        haCalculado = false;
+    }
+
+    private RenderFragment RenderCardResultados(string titulo, string icon, string colorClass, Datos resultado) => __builder =>
+    {
+        bool excedeCapacidad = resultado != null && resultado.Costos.Sum() > capacidadTransporte;
+
+        <div class="card h-100 border-0 bg-white shadow-sm rounded-3 overflow-hidden" style="opacity: @(excedeCapacidad ? "0.6" : "1.0")">
+            <div class="card-header @colorClass d-flex justify-content-between align-items-center py-2 border-0" style="font-size: 0.85rem;">
+                <span class="fw-bold"><i class="bi @icon me-1"></i>@titulo</span>
+                @if (excedeCapacidad)
+                {
+                    <span class="badge bg-danger text-white">No Viable</span>
+                }
+            </div>
+            <div class="card-body p-3">
+                @if (resultado == null)
+                {
+                    <div class="text-center py-3 text-muted">
+                        <i class="bi bi-diagram-3-fill fs-5 d-block mb-1 opacity-50"></i>
+                        <span class="small fw-semibold text-danger">Poda Excedida</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center mb-2 bg-light rounded-3 py-2 border">
+                        <span class="small text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Costo</span>
+                        <span class="fs-5 fw-bold @(excedeCapacidad ? "text-danger" : "text-success")">@resultado.Costos.Sum() pts</span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="text-muted fw-bold d-block mb-1" style="font-size: 0.75rem;"><i class="bi bi-diagram-3 me-1"></i>Salida:</span>
+                        <div class="d-flex flex-wrap gap-1">
+                            @foreach (var val in resultado.Secuencia)
+                            {
+                                <span class="badge bg-secondary p-1 px-2 rounded" style="font-size: 0.7rem;">@val</span>
+                            }
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-muted fw-bold d-block mb-1" style="font-size: 0.75rem;"><i class="bi bi-list-check me-1"></i>Cálculos:</span>
+                        <div class="timeline-visual" style="max-height: 120px; overflow-y: auto;">
+                            @for (int i = 0; i < resultado.Operaciones.Count; i++)
+                            {
+                                var op = resultado.Operaciones[i];
+                                var costoOp = resultado.Costos[i];
+                                <div class="step-row d-flex align-items-center mb-1 p-1 rounded bg-light border-start border-3 border-success" style="font-size: 0.75rem;">
+                                    <div class="d-flex align-items-center gap-1 flex-wrap">
+                                        <span class="text-muted">@op.valorAntes</span>
+                                        <span class="badge bg-dark font-monospace" style="font-size: 0.65rem;">@op.operacion</span>
+                                        <i class="bi bi-arrow-right text-muted" style="font-size: 0.7rem;"></i>
+                                        <span class="fw-bold text-dark">@op.valorDespues</span>
+                                        <span class="text-secondary" style="font-size: 0.7rem;">(+@costoOp pts)</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    };
+}
+
+<style>
+    /* Clases de utilidad personalizadas */
+    .btn-xs {
+        padding: 1px 5px;
+        font-size: 0.75rem;
+    }
+
+    .transition-all {
+        transition: all 0.2s ease-in-out;
+    }
+</style>
