@@ -260,6 +260,14 @@
                 <span class="badge bg-secondary me-1">@valor</span>
             }
         </p>
+        <p class="mb-2">
+    <strong>Nueva Secuencia:</strong><br />
+
+    @foreach (var valor in item.SecuenciaFinal)
+    {
+        <span class="badge bg-success me-1">@valor</span>
+    }
+</p>
 
         <p class="mb-2">
             <strong>Operación elegida:</strong>
