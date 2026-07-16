@@ -1,0 +1,76 @@
+﻿
+@using PuntoAcopioUNET.Services
+
+<h5 class="mt-4"><i class="bi bi-journal-text me-2"></i>Historial de Despachos</h5>
+<div class="overflow-y-auto vh-25">
+    @foreach (var item in Despacho)
+    {
+        <div class="card mb-3 shadow-sm border-start border-4 border-success">
+            <div class="card-header bg-success-subtle fw-bold">
+                <i class="bi bi-truck me-2"></i>
+                Despacho realizado
+            </div>
+
+            <div class="card-body">
+
+                <p class="mb-2">
+                    <strong>Destino:</strong>
+                    <span class="badge bg-success">@item.Destino</span>
+                </p>
+
+                <p class="mb-2">
+                    <strong>Secuencia despachada:</strong><br />
+                    @foreach (var valor in item.Secuencia)
+                    {
+                        <span class="badge bg-secondary me-1">@valor</span>
+                    }
+                </p>
+                <p class="mb-2">
+                    <strong>Nueva Secuencia:</strong><br />
+
+                    @foreach (var valor in item.SecuenciaFinal)
+                    {
+                        <span class="badge bg-success me-1">@valor</span>
+                    }
+                </p>
+
+                <p class="mb-2">
+                    <strong>Operación elegida:</strong>
+                    <span class="badge bg-primary">@item.Metodo</span>
+                </p>
+
+                <hr />
+
+                <p class="mb-1">
+                    <i class="bi bi-cpu me-1 text-primary"></i>
+                    <strong>Costo del algoritmo:</strong>
+                    @(@item.Costo - @item.CostoManual) pts
+                </p>
+
+                <p class="mb-1">
+                    <i class="bi bi-pencil-square me-1 text-warning"></i>
+                    <strong>Costo de operaciones:</strong>
+                    @item.CostoManual pts
+                </p>
+
+                <p class="mb-0">
+                    <i class="bi bi-cash-stack me-1 text-danger"></i>
+                    <strong>Costo logístico total:</strong>
+                    <span class="badge bg-danger fs-6">
+                        @item.Costo pts
+                    </span>
+
+                    <small class="text-muted ms-2">
+                        (Límite: @item.Limite pts)
+                    </small>
+                </p>
+
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    // Recibimos la lista de despachos directamente del servicio a través del Home
+    [Parameter] public List<(string Destino, List<int> Secuencia, List<int> SecuenciaFinal, string Metodo, int Costo, int CostoManual, int Limite)> Despacho { get; set; }
+}

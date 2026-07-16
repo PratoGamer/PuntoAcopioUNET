@@ -8,15 +8,8 @@
 <!-- Container Principal -->
 <div class="container-fluid py-4 bg-light min-vh-100">
 
-    <!-- Encabezado Principal -->
-    <div class="row mb-4">
-        <div class="col-12 text-center text-md-start">
-            <h1 class="display-6 fw-bold text-dark mb-1">
-                <i class="bi bi-building-fill-gear text-primary"></i> Punto de Acopio UNET
-            </h1>
-            <p class="text-muted">Calculador de Costos Logísticos Optimizados con Límite de Transporte <i class="bi bi-truck"></i></p>
-        </div>
-    </div>
+    <!-- Modulo Encabezado -->
+	<Encabezado />
 
     <div class="row g-4">
 
@@ -108,6 +101,7 @@
                         else
                         {
                             <div class="d-flex flex-column gap-2 p-2 bg-light rounded-3 border vh-25 overflow-y-auto" >
+
                                 @foreach (var item in ObtenerSecuenciaVisualEstructurada())
                                 {
                                     <div class="d-flex align-items-center justify-content-between p-2 rounded-3 border border-secondary border-opacity-10 shadow-sm transition-all"
@@ -223,88 +217,39 @@
                         <!-- Grid de los Métodos Evaluados -->
                         <div class="row g-3">
                             <div class="col-md-4">
-                                @RenderCardResultados("Mínimo Ascendente", "bi-graph-up-arrow", "bg-primary-subtle text-primary border-top border-4 border-primary", LogisticaService.ResultadoAscendente)
+
+                                <CardResultados 
+                                    Titulo="Mínimo Ascendente" 
+                                    Icono="bi-graph-up-arrow" 
+                                    ColorCabecera="bg-primary-subtle text-primary border-top border-4 border-primary"
+                                    Resultado="LogisticaService.ResultadoAscendente" />
                             </div>
                             <div class="col-md-4">
-                                @RenderCardResultados("Mínimo Descendente", "bi-graph-down-arrow", "bg-info-subtle text-info-emphasis border-top border-4 border-info", LogisticaService.ResultadoDescendente)
+
+                                <CardResultados 
+                                    Titulo="Mínimo Descendente" 
+                                    Icono="bi-graph-down-arrow" 
+                                    ColorCabecera="bg-info-subtle text-info-emphasis border-top border-4 border-info"
+                                    Resultado="LogisticaService.ResultadoDescendente" />
                             </div>
                             <div class="col-md-4">
-                                @RenderCardResultados("Mínimo Constante", "bi-dash-circle-fill", "bg-warning-subtle text-warning-emphasis border-top border-4 border-warning", LogisticaService.ResultadoConstante)
+
+                                <CardResultados 
+                                    Titulo="Mínimo Constante" 
+                                    Icono="bi-dash-circle-fill" 
+                                    ColorCabecera="bg-warning-subtle text-warning-emphasis border-top border-4 border-warning"
+                                    Resultado="LogisticaService.ResultadoConstante" />
                             </div>
                         </div>
                     }
 
                     @if (cargamentos.Any())
                     {
-                        <h5 class="mt-4"><i class="bi bi-journal-text me-2"></i>Historial de Despachos</h5>
-                        <div class="overflow-y-auto vh-25" >
-                            @foreach (var item in cargamentos)
-                            {
-                   <div class="card mb-3 shadow-sm border-start border-4 border-success">
-    <div class="card-header bg-success-subtle fw-bold">
-        <i class="bi bi-truck me-2"></i>
-        Despacho realizado
-    </div>
+                        
+						<Historial Despacho="cargamentos" />
 
-    <div class="card-body">
-
-        <p class="mb-2">
-            <strong>Destino:</strong>
-            <span class="badge bg-success">@item.Destino</span>
-        </p>
-
-        <p class="mb-2">
-            <strong>Secuencia despachada:</strong><br />
-            @foreach (var valor in item.Secuencia)
-            {
-                <span class="badge bg-secondary me-1">@valor</span>
-            }
-        </p>
-        <p class="mb-2">
-    <strong>Nueva Secuencia:</strong><br />
-
-    @foreach (var valor in item.SecuenciaFinal)
-    {
-        <span class="badge bg-success me-1">@valor</span>
-    }
-</p>
-
-        <p class="mb-2">
-            <strong>Operación elegida:</strong>
-            <span class="badge bg-primary">@item.Metodo</span>
-        </p>
-
-        <hr />
-
-        <p class="mb-1">
-            <i class="bi bi-cpu me-1 text-primary"></i>
-            <strong>Costo del algoritmo:</strong>
-            @(@item.Costo - @item.CostoManual) pts
-        </p>
-
-        <p class="mb-1">
-            <i class="bi bi-pencil-square me-1 text-warning"></i>
-            <strong>Costo de operaciones:</strong>
-            @item.CostoManual pts
-        </p>
-
-        <p class="mb-0">
-            <i class="bi bi-cash-stack me-1 text-danger"></i>
-            <strong>Costo logístico total:</strong>
-            <span class="badge bg-danger fs-6">
-                @item.Costo pts
-            </span>
-
-            <small class="text-muted ms-2">
-                (Límite: @item.Limite pts)
-            </small>
-        </p>
-
-    </div>
-</div>
-                            }
-                        </div>
                     }
+
                 </div>
             </div>
         </div>
@@ -382,34 +327,34 @@
 
         int valorActual = targetList[index];
 
-switch (accion)
-{
-    case AccionFiltro.Sumar:
-        targetList[index] = valorActual + 1;
-        costoOperaciones += 1;
-        break;
-
-    case AccionFiltro.Restar:
-        if (valorActual > 0)
+        switch (accion)
         {
-            targetList[index] = valorActual - 1;
-            costoOperaciones += 1;
-        }
-        break;
+            case AccionFiltro.Sumar:
+                targetList[index] = valorActual + 1;
+                costoOperaciones += 1;
+                break;
 
-    case AccionFiltro.Multiplicar:
-        targetList[index] = valorActual * 2;
-        costoOperaciones += 3;
-        break;
+            case AccionFiltro.Restar:
+                if (valorActual > 0)
+                {
+                    targetList[index] = valorActual - 1;
+                    costoOperaciones += 1;
+                }
+                break;
 
-    case AccionFiltro.Dividir:
-        if (valorActual % 2 == 0)
-        {
-            targetList[index] = valorActual / 2;
-            costoOperaciones += 2;
+            case AccionFiltro.Multiplicar:
+                targetList[index] = valorActual * 2;
+                costoOperaciones += 3;
+                break;
+
+            case AccionFiltro.Dividir:
+                if (valorActual % 2 == 0)
+                {
+                    targetList[index] = valorActual / 2;
+                    costoOperaciones += 2;
+                }
+                break;
         }
-        break;
-}
         haCalculado = false;
     }
 
@@ -453,12 +398,12 @@ switch (accion)
     {
         return tipo switch
         {
-            TipoItem.InsumosMedicos => "1.MED",
-            TipoItem.AlimentosNoPerecederos => "2.ALM",
-            TipoItem.AguaPotable => "3.AGU",
-            TipoItem.RopaSabanas => "4.ROP",
-            TipoItem.Otros => "5.OTR",
-            _ => "ITEM"
+            TipoItem.InsumosMedicos => "Medi",
+            TipoItem.AlimentosNoPerecederos => "Alim",
+            TipoItem.AguaPotable => "Agua",
+            TipoItem.RopaSabanas => "Ropa",
+            TipoItem.Otros => "Otro",
+            _ => "Item"
         };
     }
 
@@ -557,70 +502,4 @@ switch (accion)
         haCalculado = false;
     }
 
-    private RenderFragment RenderCardResultados(string titulo, string icon, string colorClass, Datos resultado) => __builder =>
-    {
-        bool excedeCapacidad = resultado != null && resultado.Costos.Sum() > capacidadTransporte;
-
-        <div class="card h-100 border-0 bg-white shadow-sm rounded-3 overflow-hidden" style="opacity: @(excedeCapacidad ? "0.6" : "1.0")">
-            <div class="card-header @colorClass d-flex justify-content-between align-items-center py-2 border-0 small">
-                <span class="fw-bold"><i class="bi @icon me-1"></i>@titulo</span>
-                @if (excedeCapacidad)
-                {
-                    <span class="badge bg-danger text-white">No Viable</span>
-                }
-            </div>
-            <div class="card-body p-3">
-                @if (resultado == null)
-                {
-                    <div class="text-center py-3 text-muted">
-                        <i class="bi bi-diagram-3-fill fs-5 d-block mb-1 opacity-50"></i>
-                        <span class="small fw-semibold text-danger">Poda Excedida</span>
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center mb-2 bg-light rounded-3 py-2 border">
-                        <span class="small text-muted d-block text-uppercase fw-bold small">Costo</span>
-                        <span class="fs-5 fw-bold @(excedeCapacidad ? "text-danger" : "text-success")">@resultado.Costos.Sum() pts</span>
-                    </div>
-                    <div class="mb-2">
-                        <span class="text-muted fw-bold d-block mb-1 small" ><i class="bi bi-diagram-3 me-1"></i>Salida:</span>
-                        <div class="d-flex flex-wrap gap-1">
-                            @foreach (var val in resultado.Secuencia)
-                            {
-                                <span class="badge bg-secondary p-1 px-2 rounded small" >@val</span>
-                            }
-                        </div>
-                    </div>
-                    <div>
-                        <span class="text-muted fw-bold d-block mb-1 small"><i class="bi bi-list-check me-1"></i>Cálculos:</span>
-                        <div class="timeline-visual  vh-25 overflow-y-auto" >
-                            @for (int i = 0; i < resultado.Operaciones.Count; i++)
-                            {
-                                var op = resultado.Operaciones[i];
-                                var costoOp = resultado.Costos[i];
-                                <div class="step-row d-flex align-items-center mb-1 p-1 rounded bg-light border-start border-3 border-success small">
-                                    <div class="d-flex align-items-center gap-1 flex-wrap">
-                                        <span class="text-muted">@op.valorAntes</span>
-                                        <span class="badge bg-dark font-monospace small" >@op.operacion</span>
-                                        <i class="bi bi-arrow-right text-muted small"></i>
-                                        <span class="fw-bold text-dark">@op.valorDespues</span>
-                                        <span class="text-secondary small">(+@costoOp pts)</span>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    };
 }
-
-<style>
-  
-
-    .transition-all {
-        transition: all 0.2s ease-in-out;
-    }
-</style>
