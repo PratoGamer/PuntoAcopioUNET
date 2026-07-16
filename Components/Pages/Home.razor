@@ -18,18 +18,19 @@
             <div class="card border-0 shadow-sm h-100 rounded-4">
                 <div class="card-body p-4">
                     <h5 class="card-title fw-bold mb-3 text-secondary">
-                        <i class="bi bi-gear-fill me-2 text-primary"></i>Configuración de Secuencia
+                        <i class="bi bi-gear-fill me-2 text-primary"></i>Ingreso de Secuencia
                     </h5>
 
-                    <!-- Entrada de Numeros -->
+                    <!-- Entrada de Numeros de la Secuencia -->
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold">Cantidad de Elementos (Solo positivos)</label>
+                        <label class="form-label text-muted small fw-bold">Cantidad de Cajas en el Centro de Acopio:</label>
                         <div class="input-group mb-2">
                             <span class="input-group-text bg-white"><i class="bi bi-hash"></i></span>
                             <input type="number" min="0" @bind="nuevoNumero" @bind:event="oninput"
                                    class="form-control py-2" placeholder="Ej. 15" />
                         </div>
 
+                        <!-- Verificar que no sea Negativo -->
                         @if (nuevoNumero < 0)
                         {
                             <span class="text-danger small mt-1 d-block mb-3">
@@ -37,41 +38,41 @@
                             </span>
                         }
 
-                        <!-- Botones de Categorías en una Única Fila Horizontal -->
+                        <!-- Botones de Tipo de Ayuda -->
                         <label class="form-label text-muted small fw-bold d-block mb-2">Clasificar y Añadir Tipo:</label>
                         <div class="d-flex justify-content-between gap-1">
                             <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
                                     style="background-color: #e2e8f0;" type="button"
-                                    title="1. Insumos Médicos" @onclick="() => AgregarPorCategoria(TipoItem.InsumosMedicos)" disabled="@(nuevoNumero < 0)">
+                                    title="Insumos Médicos" @onclick="() => AgregarPorCategoria(TipoItem.InsumosMedicos)" disabled="@(nuevoNumero < 0)">
                                 <i class="bi bi-capsule fs-5"></i>
                             </button>
                             <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
                                     style="background-color: #fef3c7;" type="button"
-                                    title="2. Alimentos No Perecederos" @onclick="() => AgregarPorCategoria(TipoItem.AlimentosNoPerecederos)" disabled="@(nuevoNumero < 0)">
+                                    title="Alimentos No Perecederos" @onclick="() => AgregarPorCategoria(TipoItem.AlimentosNoPerecederos)" disabled="@(nuevoNumero < 0)">
                                 <i class="bi bi-egg-fried fs-5 text-warning"></i>
                             </button>
                             <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
                                     style="background-color: #e0f2fe;" type="button"
-                                    title="3. Agua Potable" @onclick="() => AgregarPorCategoria(TipoItem.AguaPotable)" disabled="@(nuevoNumero < 0)">
+                                    title="Agua Potable" @onclick="() => AgregarPorCategoria(TipoItem.AguaPotable)" disabled="@(nuevoNumero < 0)">
                                 <i class="bi bi-droplet-fill fs-5 text-primary"></i>
                             </button>
                             <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
                                     style="background-color: #f3e8ff;" type="button"
-                                    title="4. Ropa y Sábanas" @onclick="() => AgregarPorCategoria(TipoItem.RopaSabanas)" disabled="@(nuevoNumero < 0)">
+                                    title="Ropa y Sábanas" @onclick="() => AgregarPorCategoria(TipoItem.RopaSabanas)" disabled="@(nuevoNumero < 0)">
                                 <i class="bi bi-backpack-fill fs-5 text-info"></i>
                             </button>
                             <button class="btn btn-md text-dark border-0 flex-grow-1 py-2 rounded-3 shadow-sm transition-all"
                                     style="background-color: #ffedd5;" type="button"
-                                    title="5. Otros Especiales" @onclick="() => AgregarPorCategoria(TipoItem.Otros)" disabled="@(nuevoNumero < 0)">
+                                    title="Otros Especiales" @onclick="() => AgregarPorCategoria(TipoItem.Otros)" disabled="@(nuevoNumero < 0)">
                                 <i class="bi bi-box-seam fs-5 text-danger"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Valores de Prueba Rápida -->
+                    <!-- Valores de Prueba Rapida del Sistema -->
                     <div class="mb-4">
                         <div class="d-flex gap-2 flex-wrap align-items-center">
-                            <span class="text-muted small fw-bold">Presets:</span>
+                            <span class="text-muted small fw-bold">Prueba Rápida:</span>
                             <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2 small"  @onclick="CargarPresetSimple">Simple</button>
                             <button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2 small"  @onclick="CargarPresetMediano">Mediano</button>
                         </div>
@@ -79,10 +80,10 @@
 
                     <hr class="text-muted my-3" />
 
-                    <!-- Secuencia Interactiva -->
+                    <!-- Secuencia de Ordenamiento Automatico -->
                     <div class="mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label text-muted small fw-bold mb-0">Secuencia (1 a 5 con Controles Rápidos)</label>
+                            <label class="form-label text-muted small fw-bold mb-0"> <i class="bi bi-box-arrow-down"></i> Secuencia de Cajas Ordenadas: </label>
                             @if (HayElementos)
                             {
                                 <button class="btn btn-sm text-danger p-0 border-0 bg-transparent" @onclick="LimpiarTodo">
@@ -95,7 +96,7 @@
                         {
                             <div class="text-center py-4 bg-light rounded-3 text-muted border border-secondary border-dashed">
                                 <i class="bi bi-list-ol d-block fs-3 mb-2 opacity-50"></i>
-                                <span class="small">Sin elementos. Clasifica valores para construir la secuencia.</span>
+                                <span class="small">Sin elementos. Ingrese Valores para Construir la Secuencia a Evaluar.</span>
                             </div>
                         }
                         else
@@ -107,18 +108,22 @@
                                     <div class="d-flex align-items-center justify-content-between p-2 rounded-3 border border-secondary border-opacity-10 shadow-sm transition-all"
                                          style="background-color: @ObtenerColorPastel(item.Tipo);">
 
-                                        <!-- Identificador del item -->
+                                        <!-- Identificador del Item -->
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="badge bg-dark text-white rounded-circle font-monospace">@ObtenerPrefijoCategoria(item.Tipo)</span>
                                             <strong class="fs-5">@item.Valor</strong>
                                         </div>
 
-                                        <!-- Panel de Operaciones Rápidas -->
+                                        <!-- Panel de Operaciones de Requisitos -->
                                         <div class="d-flex align-items-center gap-1">
-                                            <button class="btn btn-sm   fs-6 btn-light border py-0 px-2 rounded-2" title="Sumar 1" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Sumar)">+1</button>
-                                            <button class="btn btn-sm   fs-6 btn-light border py-0 px-2 rounded-2" title="Restar 1" disabled="@(item.Valor <= 0)" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Restar)">-1</button>
-                                            <button class="btn btn-sm   fs-6 btn-light border py-0 px-2 rounded-2" title="Multiplicar por 2" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Multiplicar)">×2</button>
-                                            <button class="btn btn-sm   fs-6  btn-light border py-0 px-2 rounded-2" title="Dividir por 2" disabled="@(item.Valor % 2 != 0)" @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Dividir)">/2</button>
+                                            <button class="btn btn-sm   fs-6 btn-light border py-0 px-2 rounded-2" title="Sumar 1" 
+                                                    @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Sumar)">+1</button>
+                                            <button class="btn btn-sm   fs-6 btn-light border py-0 px-2 rounded-2" title="Restar 1" disabled="@(item.Valor <= 0)" 
+                                                    @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Restar)">-1</button>
+                                            <button class="btn btn-sm   fs-6 btn-light border py-0 px-2 rounded-2" title="Multiplicar por 2" 
+                                                    @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Multiplicar)">×2</button>
+                                            <button class="btn btn-sm   fs-6  btn-light border py-0 px-2 rounded-2" title="Dividir por 2" disabled="@(item.Valor % 2 != 0)" 
+                                                    @onclick="() => OperarElemento(item.Tipo, item.IndexInterno, AccionFiltro.Dividir)">/2</button>
 
                                             <div class="vr  mx-1 bg-secondary opacity-50" ></div>
 
@@ -132,11 +137,11 @@
                         }
                     </div>
 
-                    <!-- Datos Logísticos de Destino y Costo Máximo de Transporte -->
+                    <!-- Datos Logisticos Destino y Capacidad de Transporte -->
                     <div class="row g-3 mb-4">
                         <div class="col-md-7">
                             <label class="form-label fw-bold text-muted small">Destino del Cargamento a Enviar</label>
-                            <input class="form-control" @bind="destino" placeholder="Ej. San Cristóbal..." />
+                            <input class="form-control" @bind="destino" placeholder="Ej. Caracas, La Guaira..." />
                         </div>
                         <div class="col-md-5">
                             <label class="form-label fw-bold text-muted small">Costo Máx. del Transporte</label>
@@ -147,14 +152,14 @@
                         </div>
                     </div>
 
-                    <!-- Botón para Calcular -->
+                    <!-- Boton para Calcular -->
                     <button class="btn btn-success w-100 py-3 rounded-3 fw-bold fs-5 shadow-sm text-white"
                             @onclick="ProcesarCalculo"
                             disabled="@(isCalculating || !HayElementos || string.IsNullOrWhiteSpace(destino) || capacidadTransporte <= 0)">
                         @if (isCalculating)
                         {
                             <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            <span>Procesando Árbol...</span>
+                            <span>Procesando Resultados...</span>
                         }
                         else
                         {
@@ -166,7 +171,7 @@
             </div>
         </div>
 
-        <!-- Panel Derecho: Resultados -->
+        <!-- Panel Derecho de Resultados -->
         <div class="col-lg-8 col-md-7 col-12">
             <div class="card border-0 shadow-sm h-100 rounded-4">
                 <div class="card-body p-4">
@@ -174,7 +179,7 @@
                         <i class="bi bi-bar-chart-line-fill me-2 text-success"></i>Resultados del Análisis de Costos
                     </h5>
 
-                    <!-- Alerta de Bloqueo por Exceso de Presupuesto del Transporte -->
+                    <!-- Alerta por Exceso de Presupuesto del Transporte -->
                     @if (haCalculado && mejorCosto == -1)
                     {
                         <div class="alert alert-danger d-flex align-items-center rounded-3 shadow-sm border-0 mb-4" role="alert">
@@ -182,7 +187,7 @@
                             <div>
                                 <h6 class="alert-heading fw-bold mb-1">¡Cargamento Retenido!</h6>
                                 <p class="mb-0 small">
-                                    Ninguna de las rutas cumple con la condición del transporte (Capacidad: <strong>@capacidadTransporte pts</strong>). El costo operacional excede el límite financiero asignado.
+                                    Ninguna de las rutas cumple con la condición del transporte (Capacidad: <strong>@capacidadTransporte pts</strong>). El Costo Operacional Excede el Límite Asignado.
                                 </p>
                             </div>
                         </div>
@@ -196,7 +201,7 @@
                             </div>
                             <h4>Listo para Calcular</h4>
                             <p class="text-muted col-10 col-md-8 mx-auto">
-                                Configura la Secuencia estructurada e introduce destino y el costo máximo del transporte.
+                                Configura la Secuencia e Introduce Destino y el Costo Máximo del Transporte.
                             </p>
                         </div>
                     }
@@ -214,7 +219,7 @@
                     }
                     else
                     {
-                        <!-- Grid de los Métodos Evaluados -->
+                        <!-- Mostrar los Metodos y Resultados Evaluados -->
                         <div class="row g-3">
                             <div class="col-md-4">
 
@@ -258,31 +263,39 @@
 </div>
 
 @code {
+
+    // Tipos de Elementos y Operaciones a Realizar
     private enum TipoItem { InsumosMedicos, AlimentosNoPerecederos, AguaPotable, RopaSabanas, Otros }
     private enum AccionFiltro { Sumar, Restar, Multiplicar, Dividir }
     private int costoOperaciones = 0;
-    // Listas independientes por cada categoría para resguardar la procedencia de los datos
+
+    // Listas de Categorias de Elementos
     private List<int> listaInsumosMedicos = new();
     private List<int> listaAlimentosNoPerecederos = new();
     private List<int> listaAguaPotable = new();
     private List<int> listaRopaSabanas = new();
     private List<int> listaOtros = new();
 
+    // Variables a Implementar
     private int nuevoNumero = 0;
-    private int capacidadTransporte = 100; // Por defecto asignamos un límite estándar
+    private int capacidadTransporte = 100;
     private bool isCalculating = false;
     private bool haCalculado = false;
     private string destino = "";
     private string mejorMetodo = "";
     private int mejorCosto = 0;
 
+    // Lista para Guardar Datos del Cargamento
     private List<(string Destino, List<int> Secuencia, List<int> SecuenciaFinal, string Metodo, int Costo,int CostoManual, int Limite)> cargamentos = new();
 
+    // Verificar si hay Elementos en las Listas
     private bool HayElementos => listaInsumosMedicos.Any() || listaAlimentosNoPerecederos.Any() ||
                                  listaAguaPotable.Any() || listaRopaSabanas.Any() || listaOtros.Any();
 
+    // Agregar Elementos a las Listas de Categorias
     private void AgregarPorCategoria(TipoItem tipo)
     {
+
         if (nuevoNumero < 0) return;
 
         switch (tipo)
@@ -295,10 +308,13 @@
         }
         nuevoNumero = 0;
         haCalculado = false;
+
     }
 
+    // Eliminar Elementos de las Listas
     private void EliminarElemento(TipoItem tipo, int index)
     {
+
         switch (tipo)
         {
             case TipoItem.InsumosMedicos: listaInsumosMedicos.RemoveAt(index); break;
@@ -308,11 +324,13 @@
             case TipoItem.Otros: listaOtros.RemoveAt(index); break;
         }
         haCalculado = false;
+
     }
 
-    // Ejecuta operaciones matemáticas controlando de manera precisa la lista que lo hospeda
+    // Ejecutar las Operaciones Matematicas y Sumar Costos
     private void OperarElemento(TipoItem tipo, int index, AccionFiltro accion)
     {
+
         List<int> targetList = tipo switch
         {
             TipoItem.InsumosMedicos => listaInsumosMedicos,
@@ -356,10 +374,13 @@
                 break;
         }
         haCalculado = false;
+
     }
 
+    // Realizar la Secuencia Final Bonita y Estructurada
     private List<(int Valor, TipoItem Tipo, int IndexInterno)> ObtenerSecuenciaVisualEstructurada()
     {
+
         var listaVisual = new List<(int Valor, TipoItem Tipo, int IndexInterno)>();
 
         listaVisual.AddRange(listaInsumosMedicos.Select((v, i) => (v, TipoItem.InsumosMedicos, i)));
@@ -369,33 +390,47 @@
         listaVisual.AddRange(listaOtros.Select((v, i) => (v, TipoItem.Otros, i)));
 
         return listaVisual;
+
     }
 
+    // Crear la Secuencia Original para el Service
     private void ConsolidarSecuenciaOriginal()
     {
+
         LogisticaService.secuenciaOriginal.Clear();
         LogisticaService.secuenciaOriginal.AddRange(listaInsumosMedicos);
         LogisticaService.secuenciaOriginal.AddRange(listaAlimentosNoPerecederos);
         LogisticaService.secuenciaOriginal.AddRange(listaAguaPotable);
         LogisticaService.secuenciaOriginal.AddRange(listaRopaSabanas);
         LogisticaService.secuenciaOriginal.AddRange(listaOtros);
+
     }
 
+    // Colores Implementados para Diferenciar los Tipos
     private string ObtenerColorPastel(TipoItem tipo)
     {
+
         return tipo switch
         {
-            TipoItem.InsumosMedicos => "#f1f5f9",         // Gris claro
-            TipoItem.AlimentosNoPerecederos => "#fffbeb", // Amarillo crema
-            TipoItem.AguaPotable => "#f0f9ff",            // Azul cielo
-            TipoItem.RopaSabanas => "#faf5ff",            // Lavanda
-            TipoItem.Otros => "#fff7ed",                  // Melocotón
+            // Gris Pastel
+            TipoItem.InsumosMedicos => "#f1f5f9",         
+            // Amarillo Pastel
+            TipoItem.AlimentosNoPerecederos => "#fffbeb", 
+            // Azul Pastel
+            TipoItem.AguaPotable => "#f0f9ff",            
+            // Morado Pastel
+            TipoItem.RopaSabanas => "#faf5ff",            
+            // Naranja Pastel
+            TipoItem.Otros => "#fff7ed",
             _ => "#ffffff"
         };
+
     }
 
+    // Prefijos de las Etiquetas para las Categorias
     private string ObtenerPrefijoCategoria(TipoItem tipo)
     {
+
         return tipo switch
         {
             TipoItem.InsumosMedicos => "Medi",
@@ -405,10 +440,13 @@
             TipoItem.Otros => "Otro",
             _ => "Item"
         };
+
     }
 
+    // Procesar el Calculo del Service
     private async Task ProcesarCalculo()
     {
+
         if (string.IsNullOrWhiteSpace(destino) || !HayElementos || capacidadTransporte <= 0) return;
 
         isCalculating = true;
@@ -426,13 +464,13 @@
         mejorMetodo = metodo;
         mejorCosto = costo;
 
-        // Si es un despacho viable (cumple el costo máximo de transporte)
+        // Si Cumple el Maximo del Transporte
         if (mejorCosto != -1 && resultadoGanador != null)
         {
             List<int> secuenciaFinal = resultadoGanador.Operaciones.Select(op => op.valorDespues).ToList();
             cargamentos.Add((destino, LogisticaService.secuenciaOriginal.ToList(), secuenciaFinal, mejorMetodo, mejorCosto +   costoOperaciones,costoOperaciones, capacidadTransporte));
 
-            // Solo reseteamos los contenedores si se despachó con éxito
+            // Reiniciar las Listas en Caso de Exito
             destino = "";
             listaInsumosMedicos.Clear();
             listaAlimentosNoPerecederos.Clear();
@@ -446,11 +484,13 @@
 
         isCalculating = false;
         haCalculado = true;
+
     }
 
-    // Filtra las opciones de cálculo que cumplan con la capacidad del transporte y toma el menor costo de ellas
+    // Filtrar las Operaciones del Calculo y Obtener el Mejor
     private (string Metodo, int Costo, Datos? Resultado) ObtenerMejorOpcionFiltrada()
     {
+
         var opciones = new List<(string Metodo, Datos Resultado)>
         {
             ("Ascendente", LogisticaService.ResultadoAscendente),
@@ -458,7 +498,7 @@
             ("Constante", LogisticaService.ResultadoConstante)
         };
 
-        // Filtramos solo los hilos válidos que no superaron el costo de transporte definido por el usuario
+        // Agregar Solo los que Cumplen la Condicion del Transporte
         var viables = opciones
             .Where(x => x.Resultado != null && x.Resultado.Costos.Sum() <= capacidadTransporte)
             .OrderBy(x => x.Resultado.Costos.Sum())
@@ -471,10 +511,13 @@
 
         var mejor = viables.First();
         return (mejor.Metodo, mejor.Resultado.Costos.Sum(), mejor.Resultado);
+
     }
 
+    // Limpiar Todas las Listas para una Nueva Operacion
     private void LimpiarTodo()
     {
+
         listaInsumosMedicos.Clear();
         listaAlimentosNoPerecederos.Clear();
         listaAguaPotable.Clear();
@@ -482,8 +525,10 @@
         listaOtros.Clear();
         LogisticaService.secuenciaOriginal.Clear();
         haCalculado = false;
+
     }
 
+    // Prueba Simple
     private void CargarPresetSimple()
     {
         LimpiarTodo();
@@ -493,6 +538,7 @@
         haCalculado = false;
     }
 
+    // Prueba Media
     private void CargarPresetMediano()
     {
         LimpiarTodo();
